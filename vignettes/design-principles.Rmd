@@ -1,8 +1,8 @@
 ---
-title: "Design Principles for {packagetemplate}"
+title: "Design Principles for {climateR0}"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Design Principles for {packagetemplate}}
+  %\VignetteIndexEntry{Design Principles for {climateR0}}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,35 +14,23 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette outlines the design decisions that have been taken during the development of the `{packagetemplate}` R package, and provides some of the reasoning, and possible pros and cons of each decision.
+This vignette outlines the design decisions that have been taken during the development of the `{climateR0}` R package, and provides some of the reasoning, and possible pros and cons of each decision.
 
 This document is primarily intended to be read by those interested in understanding the code within the package and for potential package contributors.
 
-<!-- Text in angular brackets (<>) is to guide what to include for each section please delete the guidelines and replace for your package.
-
-None of the sections are required, feel free to remove any sections not relevant to your package or add new sections if helpful. -->
-
 ## Scope
 
-< Outline the aims of the package, potentially mention some of the key exported functions, and maybe how it links with other R packages. It is also possible to mention certain aspects that fall outside of the package's scope. >
+The {climateR0} package allows for the estimation of relative R0 from mean temperature data for climate sensitive pathogen/vector pairs. This package does not directly estimate relative R0 from temperature data but instead interpolates from the constant temperature - R0 relationships in [Mordecai et al 2019](https://onlinelibrary.wiley.com/doi/10.1111/ele.13335).
 
-## Naming conventions
+This relative R0 can then be used to generate simple short-term case forecasts.
 
-< Description of the scheme and/or conventions used for naming functions and arguments. This can be the use of a prefix on all exported functions, a name mould ("all function are named verb_object"), or any other naming convention that is used throughout the package. >
+## Input and Output
 
-## Input/Output/Interoperability
-
-< Describe the data structures (i.e. vectors, `<data.frames>` or classes) that are given as input to the key functions and what data structures the functions return. The design decisions around these I/O choices could also mention how it enhances interoperability with other R packages or pipelines (e.g. with `%>%`). >
-
+The input and output of the `temperature_r0()` function are both numeric vectors. The function takes a numeric vector of mean temperature in °C and outputs a numeric vector of relative R0 (scaled from 0 to 1) with equal length to the input vector.
 
 ## Design decisions
 
-< A list of bullet points each explaining a design decision and its reasoning. >
-
 ## Dependencies
 
-< A list of dependencies used by the package with some explanation as to why they are required. Not all dependencies need to be explained and it is best to explain the key dependencies. It can be used to give context to why certain dependencies are used (e.g. "This package is expected to be used in tidyverse pipelines and as such, we consider these tidyverse packages good dependencies that will already be installed on a user's computer."). This section can also mention dependencies that are planned to be removed or added in future development. Suggested dependencies do not need to be explained unless they are unusual and may surprise developers with their inclusion. >
+* [{cinterpolate}](https://cran.r-project.org/web/packages/cinterpolate/index.html)
 
-## Development journey
-
-<  If the package has undergone any large refactoring this section can be used to explain the changes. >

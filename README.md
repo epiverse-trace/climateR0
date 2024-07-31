@@ -5,7 +5,7 @@
 <!-- `packagename` is extracted from the DESCRIPTION file -->
 <!-- `gh_repo` is extracted via a special environment variable in GitHub Actions -->
 
-# packagetemplate <img src="man/figures/logo.svg" align="right" width="120" alt="" />
+# climateR0 <img src="man/figures/logo.svg" align="right" width="120" alt="" />
 
 <!-- badges: start -->
 
@@ -17,13 +17,10 @@ coverage](https://codecov.io/gh/EmilieFinch/climateR0/branch/main/graph/badge.sv
 [![lifecycle-concept](https://raw.githubusercontent.com/reconverse/reconverse.github.io/master/images/badge-concept.svg)](https://www.reconverse.org/lifecycle.html#concept)
 <!-- badges: end -->
 
-packagetemplate provides functions to ….
 
-<!-- This sentence is optional and can be removed -->
+'{climateR0] is an `R` package to estimate relative R0 from temperature data for climate sensitive diseases.
 
-packagetemplate is developed at the [CENTER\|similar](url) at the
-[UNIVERSITY\|similar](url) as part of the [Epiverse-TRACE
-program](https://data.org/initiatives/epiverse/).
+`{climateR0}` is developed at the [Centre for the Mathematical Modelling of Infectious Diseases](https://www.lshtm.ac.uk/research/centres/centre-mathematical-modelling-infectious-diseases) at the [London School of Hygiene and Tropical Medicine](https://www.lshtm.ac.uk/) as part of [Epiverse-TRACE](https://data.org/initiatives/epiverse/).
 
 ## Installation
 
@@ -37,30 +34,14 @@ pak::pak("EmilieFinch/climateR0")
 
 ## Example
 
-These examples illustrate some of the current functionalities
-
-## Development
-
-### Lifecycle
-
-This package is currently a *concept*, as defined by the [RECON software
-lifecycle](https://www.reconverse.org/lifecycle.html). This means that
-essential features and mechanisms are still being developed, and the
-package is not ready for use outside of the development team.
-
 ### Contributions
 
 Contributions are welcome via [pull
 requests](https://github.com/EmilieFinch/climateR0/pulls).
 
-### Related projects
-
-This project is related to other existing projects in R or other
-languages, but also differs from them in the following aspects:
-
 ### Code of Conduct
 
-Please note that the packagetemplate project is released with a
+Please note that the {climateR0} project is released with a
 [Contributor Code of
 Conduct](https://github.com/epiverse-trace/.github/blob/main/CODE_OF_CONDUCT.md).
 By contributing to this project, you agree to abide by its terms.

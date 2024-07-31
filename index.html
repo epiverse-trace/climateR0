@@ -43,7 +43,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/design-principles.html">Design Principles for {packagetemplate}</a></li>
+<li><a class="dropdown-item" href="articles/design-principles.html">Design Principles for {climateR0}</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -69,51 +69,33 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="id_-packagename--">{{ packagename }} <a class="anchor" aria-label="anchor" href="#id_-packagename--"></a>
+<img src="logo.svg" class="logo" alt=""><h1 id="climater0-">climateR0 <a class="anchor" aria-label="anchor" href="#climater0-"></a>
 </h1>
 </div>
 <!-- badges: start -->
 
-<p>{{ packagename }} provides functions to ….</p>
-<!-- This sentence is optional and can be removed -->
-<p>{{ packagename }} is developed at the CENTER at the UNIVERSITY as part of the <a href="https://data.org/initiatives/epiverse/" class="external-link">Epiverse-TRACE program</a>.</p>
+<p><code>{climateR0}</code> is an <code>R</code> package to estimate relative R0 from temperature data for climate sensitive diseases.</p>
+<p><code>{climateR0}</code> is developed at the <a href="https://www.lshtm.ac.uk/research/centres/centre-mathematical-modelling-infectious-diseases" class="external-link">Centre for the Mathematical Modelling of Infectious Diseases</a> at the <a href="https://www.lshtm.ac.uk/" class="external-link">London School of Hygiene and Tropical Medicine</a> as part of <a href="https://data.org/initiatives/epiverse/" class="external-link">Epiverse-TRACE</a>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of {{ packagename }} from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of packagetemplate from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"{{ gh_repo }}"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"EmilieFinch/climateR0"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>These examples illustrate some of the current functionalities</p>
-</div>
-<div class="section level2">
-<h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
-</h2>
-<div class="section level3">
-<h3 id="lifecycle">Lifecycle<a class="anchor" aria-label="anchor" href="#lifecycle"></a>
-</h3>
-<p>This package is currently a <em>concept</em>, as defined by the <a href="https://www.reconverse.org/lifecycle.html" class="external-link">RECON software lifecycle</a>. This means that essential features and mechanisms are still being developed, and the package is not ready for use outside of the development team.</p>
-</div>
 <div class="section level3">
 <h3 id="contributions">Contributions<a class="anchor" aria-label="anchor" href="#contributions"></a>
 </h3>
-<p>Contributions are welcome via <a href="https://github.com/%7B%7B%20gh_repo%20%7D%7D/pulls" class="external-link">pull requests</a>.</p>
-</div>
-<div class="section level3">
-<h3 id="related-projects">Related projects<a class="anchor" aria-label="anchor" href="#related-projects"></a>
-</h3>
-<p>This project is related to other existing projects in R or other languages, but also differs from them in the following aspects:</p>
-<ul><li>
-</li></ul>
+<p>Contributions are welcome via <a href="https://github.com/EmilieFinch/climateR0/pulls" class="external-link">pull requests</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h3>
-<p>Please note that the {{ packagename }} project is released with a <a href="https://github.com/epiverse-trace/.github/blob/main/CODE_OF_CONDUCT.md" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Please note that the <code>{climateR0}</code> project is released with a <a href="https://github.com/epiverse-trace/.github/blob/main/CODE_OF_CONDUCT.md" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
 </div>
@@ -159,8 +141,8 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://opensource.org/license/mit/" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
-<li><a href="https://github.com/%7B%7B%20gh_repo%20%7D%7D/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/%7B%7B%20gh_repo%20%7D%7D/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/%7B%7B%20gh_repo%20%7D%7D?branch=main" class="external-link"><img src="https://codecov.io/gh/%7B%7B%20gh_repo%20%7D%7D/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/EmilieFinch/climateR0/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/EmilieFinch/climateR0/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://app.codecov.io/gh/EmilieFinch/climateR0?branch=main" class="external-link"><img src="https://codecov.io/gh/EmilieFinch/climateR0/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://www.reconverse.org/lifecycle.html#concept" class="external-link"><img src="https://raw.githubusercontent.com/reconverse/reconverse.github.io/master/images/badge-concept.svg" alt="lifecycle-concept"></a></li>
 </ul>
 </div>

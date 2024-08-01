@@ -2,7 +2,7 @@ Package: climateR0
 Title: Estimate Temperature-dependent R0 for Climate Sensitive Pathogens
 Version: 0.0.0.900
 Authors@R: c(
-    person("Emilie", "Finch", , "emilie.finch1@lshtm.ac.uk", role = "aut",
+    person("Emilie", "Finch", , "emilie.finch1@lshtm.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-8225-7533")),
     person("Adam", "Kucharski", , "adam.kucharski@lshtm.ac.uk", role = c("aut"),
            comment = c(ORCID = "0000-0001-8814-9421"))

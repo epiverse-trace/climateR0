@@ -28,6 +28,7 @@ Imports:
     cinterpolate,
     cowplot,
     dplyr,
+    ggplot2,
     here,
     lubridate,
     rlang,

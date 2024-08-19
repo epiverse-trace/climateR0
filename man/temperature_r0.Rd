@@ -9,7 +9,7 @@ temperature_r0(data, vector_pathogen)
 \arguments{
 \item{data}{a numeric vector of mean temperature values in °C}
 
-\item{vector_pathogen}{character vector specifying the vector of interest
+\item{vector_pathogen}{character vector specifying the vector and pathogen of interest
 This can be one of the following:
 AeaeDENV; AeaeZIKV; AealDENV; AetaRVFV; AetaSINV; AetrEEEV; AngaPfal; CxanMVEx; CxanRRVx; CxpiSINV;
 CxpiWNVxl; CxtaWEEV; CxtaWNVx; CxunWNVx}

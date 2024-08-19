@@ -1,0 +1,68 @@
+---
+title: "Estimate relative R0 from temperature data for vector-borne diseases with {climateR0}"
+output: 
+  bookdown::html_vignette2:
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{temperature_R0}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 5
+)
+```
+
+Temperature is an important driver of vector-borne disease transmission, affecting vector reproduction, development, and survival, as well as the probability of pathogen transmission. Previous work by [Mordecai and colleagues](https://onlinelibrary.wiley.com/doi/10.1111/ele.13335) empirically estimated the effect of temperature on different vector traits, and used these to develop models of temperature dependent R~0~.
+
+The {climateR0} package extracts temperature-dependent R0 for an input time series of mean temperature for 14 vector-pathogen combinations, focusing on mosquito-borne diseases that pose a major public health threat. Temperature dependent R~0~ is a relative measure bounded between 0 and 1, where 1 indicates maximum temperature suitability for transmission. This is a useful indicator for the epidemic potential of a vector-borne disease which can be used for situational awareness or be incorporated into forecasting models to predict future cases. Note that we use a relative measure of R~0~ as other factors affect the absolute magnitude of R~0~ such as immunity, control measures and population behaviour, which are not considered here. 
+
+```{r setup}
+library(climateR0)
+```
+
+### Case study - 2013/14 DENV3 outbreak in Fiji
+
+As a case study, we'll use data from a 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
+
+```{r}
+fiji_cases <- fiji_2014 |> 
+  ggplot2::ggplot() +
+  ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
+  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  ggplot2::labs(x = "Date", y = "Cases") +
+  ggplot2::theme_classic()
+
+fiji_cases
+
+```
+
+In the same dataset, we have a time-series of monthly mean temperatures (in °C) for Fiji. To extract corresponding temperature-dependent R~0~ values from the temperature-relative R0 curves estimated by Mordecai et al, we use the `temperature_R0()` function. Within the function call, we specify a vector-pathogen code of `AeaeDENV` for the vector *Aedes aegypti* and pathogen dengue virus.
+
+```{r}
+fiji_2014$rR0 <- temperature_r0(fiji_2014$av_temp, "AeaeDENV")
+```
+
+Now we can plot relative temperature-dependent R0 values alongside case data.
+
+```{r, include = FALSE}
+fiji_rR0 <- fiji_2014 |> 
+  ggplot2::ggplot() +
+  ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
+  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  ggplot2::labs(x = "Date", y = "Relative R0") +
+  ggplot2::theme_classic()
+
+fiji_rR0
+```
+
+```{r}
+cowplot::plot_grid(fiji_cases, fiji_rR0, nrow = 2)
+```
+
+As discussed in [Kucharski et al 2018](https://elifesciences.org/articles/34848#s2), comparing the case time series with temperature-dependent R~0~ indicates that a fall in transmission due to seasonal temperature variation cannot fully explain the fall in cases from March 2014. In this paper, Kucharski and colleagues found that a model including the build-up of herd immunity and a decrease in transmission resulting from a vector control campaign in March 2024 better captured the observed pattern of cases.

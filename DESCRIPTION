@@ -10,7 +10,12 @@ Authors@R: c(
 Description: Estimate temperature dependent R0 for a given pathogen and vector from temperature data using experimentally derived constant temperature-R0 curves.
 License: MIT + file LICENSE
 Suggests: 
+    bookdown,
+    cowplot,
+    ggplot2,
+    here,
     knitr,
+    lubridate,
     rmarkdown,
     spelling,
     testthat (>= 3.0.0)
@@ -24,13 +29,8 @@ Language: en-GB
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: 
-    bookdown,
     cinterpolate,
-    cowplot,
     dplyr,
-    ggplot2,
-    here,
-    lubridate,
     rlang,
     stats,
     tibble,

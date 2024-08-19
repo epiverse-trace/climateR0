@@ -1,0 +1,15 @@
+﻿vector_pathogen,vector_code,pathogen_code,vector_name,pathogen_name
+AeaeDENV,Aeae,DENV,aedes_aegypti,dengue_virus
+AeaeZIKV,Aeae,ZIKV,aedes_aegypti,zika_virus
+AealDENV,Aeal,DENV,aedes_albopictus,dengue_virus
+AetaRVFV,Aeta,RVFV,aedes_taeniorhynchus,rift_valley_fever_virus
+AetaSINV,Aeta,SINV,aedes_taeniorhynchus,sindbis_virus
+AetrEEEV,Aetr,EEEV,aedes_triseriatus,eastern_equine_encephalitis_virus
+AngaPfal,Anga,Pfal,anopholes_gambiae,plasmodium_falciparum
+CxanMVEx,Cxan,MVEx,culex_annulirostris,murray_valley_encephalitis_virus
+CxanRRVx,Cxan,RRVx,culex_annulirostris,ross_river_virus
+CxpiSINV,Cxpi,SINV,culex_pipiens,sindbis_virus
+CxpiWNVx,Cxpi,WNVx,culex_pipiens,west_nile_virus
+CxtaWEEV,Cxta,WEEV,culex_tarsalis,western_equine_encephalitis_virus
+CxtaWNVx,Cxta,WNBx,culex_tarsalis,west_nile_virus
+CxunWNVx,Cxun,WNVx,culex_univittatus,west_nile_virus

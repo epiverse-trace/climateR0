@@ -1,6 +1,13 @@
 # Fiji dengue case study data
 # From Kucharski et al 2018, https://github.com/adamkucharski/fiji-denv3-2014
 
+if (!require("here")) install.packages("here")
+library(here)
+if (!require("lubridate")) install.packages("lubridate")
+library(lubridate)
+library(dplyr)
+library(tidyr)
+
 fiji_denv3_2014 <- read.csv(here("data-raw", "fiji-central_lab-tested_denv3-2014.csv")) |> 
   dplyr::mutate(month_date = lubridate::floor_date(as.Date(date, format = "%d/%m/%Y"), unit = "month")) |> 
   tidyr::pivot_longer(c("central", "western", "north", "east"), names_to = "geography", values_to = "cases")

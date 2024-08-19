@@ -22,8 +22,10 @@ Temperature is an important driver of vector-borne disease transmission, affecti
 
 The {climateR0} package extracts temperature-dependent R0 for an input time series of mean temperature for 14 vector-pathogen combinations, focusing on mosquito-borne diseases that pose a major public health threat. Temperature dependent R~0~ is a relative measure bounded between 0 and 1, where 1 indicates maximum temperature suitability for transmission. This is a useful indicator for the epidemic potential of a vector-borne disease which can be used for situational awareness or be incorporated into forecasting models to predict future cases. Note that we use a relative measure of R~0~ as other factors affect the absolute magnitude of R~0~ such as immunity, control measures and population behaviour, which are not considered here. 
 
-```{r setup}
+```{r setup, include = FALSE}
 library(climateR0)
+library(ggplot2)
+library(cowplot)
 ```
 
 ### Case study - 2013/14 DENV3 outbreak in Fiji

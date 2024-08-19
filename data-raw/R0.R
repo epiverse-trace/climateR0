@@ -1,6 +1,9 @@
 # Constant temperature - R0 data 
 # From Mordecai et al 2019
 
+if (!require("here")) install.packages("here")
+library(here)
+
 AeaeDENV_R0 <- read.csv(here("data-raw", "Thermal-Eco-MBD-main", "AeaeDENV.R0.csv"))
 AeaeZIKV_R0 <- read.csv(here("data-raw", "Thermal-Eco-MBD-main", "AeaeZIKV.R0.csv"))
 AealDENV_R0 <- read.csv(here("data-raw", "Thermal-Eco-MBD-main", "AealDENV.R0.csv"))

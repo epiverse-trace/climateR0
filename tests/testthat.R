@@ -7,3 +7,7 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
+
+library(climateR0)
+
+test_check("climateR0", stop_on_warning = FALSE)

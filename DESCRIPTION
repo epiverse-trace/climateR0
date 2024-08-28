@@ -31,6 +31,7 @@ RoxygenNote: 7.2.3
 Imports: 
     cinterpolate,
     dplyr,
+    magrittr,
     rlang,
     stats,
     tibble,

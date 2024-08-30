@@ -13,10 +13,13 @@ Suggests:
     bookdown,
     cowplot,
     ggplot2,
+    gratia,
     here,
     knitr,
     lubridate,
+    mgcv,
     rmarkdown,
+    scales,
     spelling,
     testthat (>= 3.0.0)
 VignetteBuilder: 

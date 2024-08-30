@@ -5,7 +5,7 @@
 \alias{fiji_2014}
 \title{Fiji 2014.}
 \format{
-An object of class \code{data.frame} with 44 rows and 3 columns.
+An object of class \code{data.frame} with 44 rows and 4 columns.
 }
 \usage{
 fiji_2014

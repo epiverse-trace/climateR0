@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 Temperature is an important driver of vector-borne disease transmission, affecting vector reproduction, development, and survival, as well as the probability of pathogen transmission. Previous work by [Mordecai and colleagues](https://onlinelibrary.wiley.com/doi/10.1111/ele.13335) empirically estimated the effect of temperature on different vector traits, and used these to develop models of temperature dependent R~0~.
 
-The {climateR0} package extracts temperature-dependent R0 for an input time series of mean temperature for 14 vector-pathogen combinations, focusing on mosquito-borne diseases that pose a major public health threat. Temperature dependent R~0~ is a relative measure bounded between 0 and 1, where 1 indicates maximum temperature suitability for transmission. This is a useful indicator for the epidemic potential of a vector-borne disease which can be used for situational awareness or be incorporated into forecasting models to predict future cases. Note that we use a relative measure of R~0~ as other factors affect the absolute magnitude of R~0~ such as immunity, control measures and population behaviour, which are not considered here. 
+The {climateR0} package extracts temperature-dependent R~0~ for an input time series of mean temperature for 14 vector-pathogen combinations, focusing on mosquito-borne diseases that pose a major public health threat. Temperature dependent R~0~ is a relative measure bounded between 0 and 1, where 1 indicates maximum temperature suitability for transmission. This is a useful indicator for the epidemic potential of a vector-borne disease which can be used for situational awareness or be incorporated into forecasting models to predict future cases. Note that we use a relative measure of R~0~ as other factors affect the absolute magnitude of R~0~ such as immunity, control measures and population behaviour, which are not considered here. 
 
 ```{r setup, include = FALSE}
 library(climateR0)
@@ -30,29 +30,29 @@ library(cowplot)
 
 ### Case study - 2013/14 DENV3 outbreak in Fiji
 
-As a case study, we'll use data from a 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
+As a first case study, we'll use data from a 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
 
 ```{r}
 fiji_cases <- fiji_2014 |> 
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
-  ggplot2::labs(x = "Date", y = "Cases") +
+  ggplot2::labs(x = "Date", y = "Reported dengue cases") +
   ggplot2::theme_classic()
 
 fiji_cases
 
 ```
 
-In the same dataset, we have a time-series of monthly mean temperatures (in °C) for Fiji. To extract corresponding temperature-dependent R~0~ values from the temperature-relative R0 curves estimated by Mordecai et al, we use the `temperature_R0()` function. Within the function call, we specify a vector-pathogen code of `AeaeDENV` for the vector *Aedes aegypti* and pathogen dengue virus.
+In the same dataset, we have a time-series of monthly mean temperatures (in °C) for Central Division, Fiji. To extract corresponding temperature-dependent R~0~ values from the temperature-relative R0 curves estimated by Mordecai et al, we use the `temperature_R0()` function. Within the function call, we specify a vector-pathogen code of `AeaeDENV` for the vector *Aedes aegypti* and pathogen dengue virus.
 
 ```{r}
 fiji_2014$rR0 <- temperature_r0(fiji_2014$av_temp, "AeaeDENV")
 ```
 
-Now we can plot relative temperature-dependent R0 values alongside case data.
+Now we can plot relative temperature-dependent R~0~ values alongside case data.
 
-```{r, include = FALSE}
+```{r}
 fiji_rR0 <- fiji_2014 |> 
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
@@ -67,4 +67,47 @@ fiji_rR0
 cowplot::plot_grid(fiji_cases, fiji_rR0, nrow = 2)
 ```
 
-As discussed in [Kucharski et al 2018](https://elifesciences.org/articles/34848#s2), comparing the case time series with temperature-dependent R~0~ indicates that a fall in transmission due to seasonal temperature variation cannot fully explain the fall in cases from March 2014. In this paper, Kucharski and colleagues found that a model including the build-up of herd immunity and a decrease in transmission resulting from a vector control campaign in March 2024 better captured the observed pattern of cases.
+As discussed in [Kucharski et al (2018)](https://elifesciences.org/articles/34848#s2), comparing the case time series with temperature-dependent R~0~ indicates that a fall in transmission due to seasonal temperature variation cannot fully explain the fall in cases from March 2014. In this paper, Kucharski and colleagues found that a model including the build-up of herd immunity and a decrease in transmission resulting from a vector control campaign in March 2024 better captured the observed pattern of cases.
+
+### Case study - 2013/14 Zika outbreak in French Polynesia
+
+As a second study, we'll use data from a 2013/4 Zika outbreak in Tahiti, French Polynesia. Here we show laboratory confirmed cases over time from sentinel reporting sites in Tahiti.
+
+```{r}
+tahiti_cases <- tahiti_2013 |> 
+  ggplot2::ggplot() +
+  ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
+  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  ggplot2::labs(x = "Date", y = "Reported Zika cases") +
+  ggplot2::theme_classic()
+
+tahiti_cases
+
+```
+
+In the same dataset, we have a time-series of monthly mean temperatures (in °C) for Tahiti. Again, we use the `temperature_R0()` function. Within the function call, we specify a vector-pathogen code of `AeaeZIKV` for the vector *Aedes aegypti* and pathogen Zika virus. (Note that the main vectors in French Polynesia include both *Ae. aegypti* and *Ae. polynesiensis*.)
+
+```{r}
+tahiti_2013$rR0 <- temperature_r0(tahiti_2013$av_temp, "AeaeZIKV")
+```
+
+Now we can plot relative temperature-dependent R~0~ values alongside case data.
+
+```{r}
+tahiti_rR0 <- tahiti_2013 |> 
+  ggplot2::ggplot() +
+  ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
+  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  ggplot2::labs(x = "Date", y = "Relative R0") +
+  ggplot2::theme_classic()
+
+tahiti_rR0
+```
+
+```{r}
+cowplot::plot_grid(tahiti_cases, tahiti_rR0, nrow = 2)
+```
+
+As discussed in [Kucharski et al (201)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726), the outbreak ended before temperature or rainfall levels changed in a way that would imply a transmission reduction, indicating that immunity played a major role in driving the epidemic decline. This is consistent with later antibody data reported by [Aubry et al ( 2017)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5367400/)
+
+

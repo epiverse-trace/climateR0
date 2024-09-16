@@ -85,8 +85,8 @@ as well as the probability of pathogen transmission. Previous work by <a href="h
 and colleagues</a> empirically estimated the effect of temperature on
 different vector traits, and used these to develop models of temperature
 dependent R<sub>0</sub>.</p>
-<p>The {climateR0} package extracts temperature-dependent R0 for an
-input time series of mean temperature for 14 vector-pathogen
+<p>The {climateR0} package extracts temperature-dependent R<sub>0</sub>
+for an input time series of mean temperature for 14 vector-pathogen
 combinations, focusing on mosquito-borne diseases that pose a major
 public health threat. Temperature dependent R<sub>0</sub> is a relative
 measure bounded between 0 and 1, where 1 indicates maximum temperature
@@ -100,36 +100,46 @@ behaviour, which are not considered here.</p>
 <div class="section level3">
 <h3 id="case-study---201314-denv3-outbreak-in-fiji">Case study - 2013/14 DENV3 outbreak in Fiji<a class="anchor" aria-label="anchor" href="#case-study---201314-denv3-outbreak-in-fiji"></a>
 </h3>
-<p>As a case study, we’ll use data from a 2013/4 DENV-3 outbreak in
-Fiji. Here we show laboratory confirmed cases over time in Central
+<p>As a first case study, we’ll use data from a 2013/4 DENV-3 outbreak
+in Fiji. Here we show laboratory confirmed cases over time in Central
 Division.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fiji_cases</span> <span class="op">&lt;-</span> <span class="va">fiji_2014</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">cases</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#016c59"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="st">"month"</span>, date_labels <span class="op">=</span> <span class="st">"%b-%y"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"Cases"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"Reported dengue cases"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fiji_cases</span></span></code></pre></div>
 <p><img src="climateR0_files/figure-html/unnamed-chunk-2-1.png" width="768"></p>
 <p>In the same dataset, we have a time-series of monthly mean
-temperatures (in °C) for Fiji. To extract corresponding
-temperature-dependent R<sub>0</sub> values from the temperature-relative
-R0 curves estimated by Mordecai et al, we use the
+temperatures (in °C) for Central Division, Fiji. To extract
+corresponding temperature-dependent R<sub>0</sub> values from the
+temperature-relative R0 curves estimated by Mordecai et al, we use the
 <code>temperature_R0()</code> function. Within the function call, we
 specify a vector-pathogen code of <code>AeaeDENV</code> for the vector
 <em>Aedes aegypti</em> and pathogen dengue virus.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fiji_2014</span><span class="op">$</span><span class="va">rR0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/temperature_r0.html">temperature_r0</a></span><span class="op">(</span><span class="va">fiji_2014</span><span class="op">$</span><span class="va">av_temp</span>, <span class="st">"AeaeDENV"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Returning relative R0 for vector: aedes_aegypti and pathogen: dengue_virus</span></span></code></pre></div>
-<p>Now we can plot relative temperature-dependent R0 values alongside
-case data.</p>
+<p>Now we can plot relative temperature-dependent R<sub>0</sub> values
+alongside case data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fiji_rR0</span> <span class="op">&lt;-</span> <span class="va">fiji_2014</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">rR0</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#54278f"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="st">"month"</span>, date_labels <span class="op">=</span> <span class="st">"%b-%y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"Relative R0"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fiji_rR0</span></span></code></pre></div>
+<p><img src="climateR0_files/figure-html/unnamed-chunk-4-1.png" width="768"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html" class="external-link">plot_grid</a></span><span class="op">(</span><span class="va">fiji_cases</span>, <span class="va">fiji_rR0</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="climateR0_files/figure-html/unnamed-chunk-5-1.png" width="768"></p>
 <p>As discussed in <a href="https://elifesciences.org/articles/34848#s2" class="external-link">Kucharski et al
-2018</a>, comparing the case time series with temperature-dependent
+(2018)</a>, comparing the case time series with temperature-dependent
 R<sub>0</sub> indicates that a fall in transmission due to seasonal
 temperature variation cannot fully explain the fall in cases from March
 2014. In this paper, Kucharski and colleagues found that a model
@@ -137,7 +147,87 @@ including the build-up of herd immunity and a decrease in transmission
 resulting from a vector control campaign in March 2024 better captured
 the observed pattern of cases.</p>
 </div>
-  </main>
+<div class="section level3">
+<h3 id="case-study---201314-zika-outbreak-in-french-polynesia">Case study - 2013/14 Zika outbreak in French Polynesia<a class="anchor" aria-label="anchor" href="#case-study---201314-zika-outbreak-in-french-polynesia"></a>
+</h3>
+<p>As a second study, we’ll use data from a 2013/4 Zika outbreak in
+Tahiti, French Polynesia. Here we show laboratory confirmed cases over
+time from sentinel reporting sites in Tahiti.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tahiti_cases</span> <span class="op">&lt;-</span> <span class="va">tahiti_2013</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">cases</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#016c59"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="st">"month"</span>, date_labels <span class="op">=</span> <span class="st">"%b-%y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"Reported Zika cases"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tahiti_cases</span></span></code></pre></div>
+<p><img src="climateR0_files/figure-html/unnamed-chunk-6-1.png" width="768"></p>
+<p>In the same dataset, we have a time-series of monthly mean
+temperatures (in °C) for Tahiti. Again, we use the
+<code>temperature_R0()</code> function. Within the function call, we
+specify a vector-pathogen code of <code>AeaeZIKV</code> for the vector
+<em>Aedes aegypti</em> and pathogen Zika virus. (Note that the main
+vectors in French Polynesia include both <em>Aedes aegypti</em> and
+<em>Aedes polynesiensis</em>.)</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tahiti_2013</span><span class="op">$</span><span class="va">rR0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/temperature_r0.html">temperature_r0</a></span><span class="op">(</span><span class="va">tahiti_2013</span><span class="op">$</span><span class="va">av_temp</span>, <span class="st">"AeaeZIKV"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Returning relative R0 for vector: aedes_aegypti and pathogen: zika_virus</span></span></code></pre></div>
+<p>Now we can plot relative temperature-dependent R<sub>0</sub> values
+alongside case data.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tahiti_rR0</span> <span class="op">&lt;-</span> <span class="va">tahiti_2013</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">rR0</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#54278f"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">scale_x_date</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="st">"month"</span>, date_labels <span class="op">=</span> <span class="st">"%b-%y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"Relative R0"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tahiti_rR0</span></span></code></pre></div>
+<p><img src="climateR0_files/figure-html/unnamed-chunk-8-1.png" width="768"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html" class="external-link">plot_grid</a></span><span class="op">(</span><span class="va">tahiti_cases</span>, <span class="va">tahiti_rR0</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="climateR0_files/figure-html/unnamed-chunk-9-1.png" width="768"></p>
+<p>As discussed in <a href="https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726" class="external-link">Kucharski
+et al (201)</a>, the outbreak ended before temperature or rainfall
+levels changed in a way that would imply a transmission reduction,
+indicating that immunity played a major role in driving the epidemic
+decline. This is consistent with later antibody data reported by <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5367400/" class="external-link">Aubry et al
+( 2017)</a></p>
+</div>
+<div class="section level3">
+<h3 id="caveats-to-the-model-approach">Caveats to the model approach<a class="anchor" aria-label="anchor" href="#caveats-to-the-model-approach"></a>
+</h3>
+<p>The models used here do not account for other aspects of weather and
+climate variability that are likely to influence vector-borne disease
+dynamics, including variation in precipitation, relative humidity, and
+temperature over time. This approach also does not account for time lags
+between temperature and R0; instead, it calculates a static snapshot of
+the relative temperature suitability for transmission at a given point
+in time, assuming the temperature had been constant up to that point. In
+reality, multiple time lags may be relevant to R0. For example,
+temperature 4-8 weeks ago may affect the mosquito population size and
+development rate, whereas temperature 2-4 weeks ago may affect the
+vector competence and extrinsic incubation period.</p>
+<p>Despite these limitations, temperature-dependent relative R0 has been
+used to predict geographical and temporal variation in different
+settings for malaria, dengue, Zika, Ross River virus and West Nile virus
+(further details in the references below).</p>
+<ul>
+<li><a href="https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568" class="external-link">Mordecai
+et al 2017</a></li>
+<li><a href="https://royalsocietypublishing.org/doi/full/10.1098/rspb.2018.0795?rfr_dat=cr_pub++0pubmed&amp;url_ver=Z39.88-2003&amp;rfr_id=ori%3Arid%3Acrossref.org" class="external-link">Tesla
+et al 2018</a></li>
+<li><a href="https://elifesciences.org/articles/37762" class="external-link">Shocket et al
+2018</a></li>
+<li><a href="https://elifesciences.org/articles/58511" class="external-link">Shocket et al
+2020</a></li>
+<li><a href="https://www.medrxiv.org/content/10.1101/2024.01.08.24301015v1" class="external-link">Childs
+et al 2024</a></li>
+</ul>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

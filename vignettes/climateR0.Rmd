@@ -110,4 +110,14 @@ cowplot::plot_grid(tahiti_cases, tahiti_rR0, nrow = 2)
 
 As discussed in [Kucharski et al (201)](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726), the outbreak ended before temperature or rainfall levels changed in a way that would imply a transmission reduction, indicating that immunity played a major role in driving the epidemic decline. This is consistent with later antibody data reported by [Aubry et al ( 2017)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5367400/)
 
+### Caveats to the model approach
 
+The models used here do not account for other aspects of weather and climate variability that are likely to influence vector-borne disease dynamics, including variation in precipitation, relative humidity, and temperature over time. This approach also does not account for time lags between temperature and R0; instead, it calculates a static snapshot of the relative temperature suitability for transmission at a given point in time, assuming the temperature had been constant up to that point. In reality, multiple time lags may be relevant to R0. For example, temperature 4-8 weeks ago may affect the mosquito population size and development rate, whereas temperature 2-4 weeks ago may affect the vector competence and extrinsic incubation period. 
+
+Despite these limitations, temperature-dependent relative R0 has been used to predict geographical and temporal variation in different settings for malaria, dengue, Zika, Ross River virus and West Nile virus (further details in the references below).
+
+* [Mordecai et al 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005568)
+* [Tesla et al 2018](https://royalsocietypublishing.org/doi/full/10.1098/rspb.2018.0795?rfr_dat=cr_pub++0pubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org)
+* [Shocket et al 2018](https://elifesciences.org/articles/37762)
+* [Shocket et al 2020](https://elifesciences.org/articles/58511)
+* [Childs et al 2024](https://www.medrxiv.org/content/10.1101/2024.01.08.24301015v1)

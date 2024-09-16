@@ -23,7 +23,7 @@
 #'   \item{date}{Date of epidemiological week}
 #'   \item{cases}{Number of laboratory confirmed cases in Tahiti}
 #'   \item{reporting_sites}{Number of sentinel sites in Tahiti reporting that month}
-#'   \item{total_sites}{Total sentinal sites Tahiti}
+#'   \item{total_sites}{Total sentinel sites Tahiti}
 #'   \item{av_temp}{Average monthly temperature for Tahiti, in °C}
 #'   \item{av_temp}{Average monthly rainfall for Tahiti, in mm}
 #'   ...

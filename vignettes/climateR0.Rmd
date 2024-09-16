@@ -85,7 +85,7 @@ tahiti_cases
 
 ```
 
-In the same dataset, we have a time-series of monthly mean temperatures (in °C) for Tahiti. Again, we use the `temperature_R0()` function. Within the function call, we specify a vector-pathogen code of `AeaeZIKV` for the vector *Aedes aegypti* and pathogen Zika virus. (Note that the main vectors in French Polynesia include both *Ae. aegypti* and *Ae. polynesiensis*.)
+In the same dataset, we have a time-series of monthly mean temperatures (in °C) for Tahiti. Again, we use the `temperature_R0()` function. Within the function call, we specify a vector-pathogen code of `AeaeZIKV` for the vector *Aedes aegypti* and pathogen Zika virus. (Note that the main vectors in French Polynesia include both *Aedes aegypti* and *Aedes polynesiensis*.)
 
 ```{r}
 tahiti_2013$rR0 <- temperature_r0(tahiti_2013$av_temp, "AeaeZIKV")

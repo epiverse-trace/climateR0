@@ -35,6 +35,7 @@ library(mgcv)
 library(dplyr)
 library(gratia)
 library(ggplot2)
+library(MASS)
 ```
 
 One potential use of the {climateR0} package is to use temperature-dependent R0 values as an input within a short-term forecasting model. In this vignette we outline an example using a generalised additive model, implemented in the `mgcv` package. 
@@ -196,6 +197,47 @@ lines(train_test_data$date,train_test_data$cases,col=col_grad[ii],lwd=2)
 #weekly_forecasts[[match(prediction_start,prediction_dates)]] <- train_test_data
 
 }
+```
+
+Test multiple outputs
+```{r}
+# 
+# Number of simulations
+n_sim <- 1000
+
+# Predicted means based on original model for reference
+original_means <- predict(gam_mod, newdata = train_test_data, type = "link")
+
+# Get the variance-covariance matrix of the model coefficients
+vcov_matrix <- vcov(gam_mod)
+
+# Extract the coefficients of the model
+coef_mean <- coef(gam_mod)
+
+# Extract the dispersion parameter (theta) for the negative binomial
+theta <- gam_mod$family$getTheta()
+
+# Set up matrix to store simulations
+set.seed(123)  # For reproducibility
+simulations <- matrix(NA, nrow = nrow(train_test_data), ncol = n_sim)
+
+# Loop to generate simulations
+for (i in 1:n_sim) {
+  # Draw a new set of coefficients from the multivariate normal distribution
+  coef_sim <- mvrnorm(1, mu = coef_mean, Sigma = vcov_matrix)
+  
+  # Compute the linear predictor with the new coefficients
+  linear_predictor <- model.matrix(gam_mod, newdata = train_test_data) %*% coef_sim
+  
+  # Transform to the response scale (mean counts) using the inverse log-link
+  predicted_means <- exp(linear_predictor)
+  
+  # Generate simulated counts from the negative binomial distribution
+  simulations[, i] <- rnbinom(n = length(predicted_means), mu = predicted_means, size = theta)
+}
+
+# `simulations` now contains 1000 simulated datasets, each in a column
+simulations
 ```
 
 

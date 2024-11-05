@@ -201,7 +201,7 @@ lines(train_test_data$date,train_test_data$cases,col=col_grad[ii],lwd=2)
 
 ### Further thoughts
 
-TBC
+* Need better handling of uncertainty in propagated outbreaks
     
 ### References
 [Cori et al, 2013](https://academic.oup.com/aje/article/178/9/1505/89262)  

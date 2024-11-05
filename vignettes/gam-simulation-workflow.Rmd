@@ -1,0 +1,210 @@
+---
+title: "Example workflow for longer-term simulation with relative R0"
+output: 
+  html_document:
+      toc: true
+      toc_float: true
+      code_folding: show
+vignette: >
+  %\VignetteIndexEntry{gam-forecasting-workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Note: this vignette builds on the `gam-forecasting-workflow.Rmd` vignette, focusing on longer term simulations, projecting cases using the fitted GAM at each time step, then uses these cases to generate new values of susceptibles and lagged cases to project the next step.
+
+Some other changes:  
+* The GAM is now more constrained, removing the `s()` terms for fixed terms, which should be reasonable given the linear relationship between R0 and rR0 scaling
+* A log link has been added to ensure outcome is reflected as $log(E[I_t])$
+* Exploratory code for a `temperature_gt` that uses the Siraj et al temperature-dependent generation interval
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 5,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{r setup, include = FALSE}
+library(climateR0)
+library(here)
+library(mgcv)
+library(dplyr)
+library(gratia)
+library(ggplot2)
+```
+
+One potential use of the {climateR0} package is to use temperature-dependent R0 values as an input within a short-term forecasting model. In this vignette we outline an example using a generalised additive model, implemented in the `mgcv` package. 
+
+As a case study, we'll use the same data as in the 'Getting Started' vignette. We will forecast confirmed dengue cases from the 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
+
+```{r}
+fiji_cases <- fiji_2014 |> 
+  ggplot2::ggplot() +
+  ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
+  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  ggplot2::labs(x = "Date", y = "Cases") +
+  ggplot2::theme_classic()
+
+fiji_cases
+
+```
+
+## Model set-up
+
+First, we calculate temperature-dependent R0 values using mean temperature.
+
+```{r}
+fiji_2014$rR0 <- temperature_r0(fiji_2014$av_temp, "AeaeDENV")
+```
+
+We next define a function to weight lagged cases by the dengue serial interval.
+
+```{r}
+# Function to weight past cases by dengue serial interval
+# From Siraj et al 2017
+
+weight_cases_temp <- function(x, weight_vals){
+  weighted_cases <- lag(x,2)*weight_vals[2] + 
+                    lag(x,3)*weight_vals[3] + 
+                    lag(x,4)*weight_vals[4] + 
+                    lag(x,5)*weight_vals[5]
+  return(weighted_cases)
+}
+
+
+temperature_gt <- function(x, temp){
+  
+  daily_weights <- gt.function(temp)(1:50) # From arbotemp paper
+  daily_weights <- daily_weights/sum(daily_weights)
+  
+  weekly_weights <- tapply(daily_weights, (seq_along(daily_weights) - 1) %/% 7, sum)
+  
+  weight_cases_temp(x, weekly_weights)
+
+}
+
+weight_cases <- function(x){
+  weighted_cases <- lag(x,2)*0.2 + lag(x,3)*0.425 + lag(x,4)*0.25 + lag(x,5)*0.125
+  return(weighted_cases)
+}
+
+```
+
+Now we wrangle the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
+
+```{r}
+pop <- 378284
+rep_prop <- 0.1 # Proportion of infections reported as cases
+
+model_data <- fiji_2014 |> 
+  dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
+  dplyr::arrange(date) |> 
+  dplyr::mutate(cumulative_cases = cumsum(cases), 
+                pop_susceptible = 1 - pmax(0, (cumulative_cases/pop)/rep_prop),
+         weighted_lagged_cases = weight_cases(cases),
+         log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001),
+         log_pop_susceptible = log(pop_susceptible + 0.001))
+
+horizon <- 15
+
+# Note the below is constrained to match the temperature date range available
+prediction_dates <- seq(from = as.Date("2013-12-30"), to = as.Date("2014-09-01"), by = 7)
+
+```
+
+## Forecasting 
+
+We now generate 10-week ahead forecasts for each of our prediction dates.
+
+```{r}
+
+all_forecasts <- NULL 
+weekly_forecasts <- NULL
+prediction_range <- prediction_dates[1:15]
+
+for(ii in 1:length(prediction_range)){ 
+  
+prediction_start <- prediction_range[ii]
+
+message(paste0("Generating forecasts for prediction week starting: "), as.Date(as.numeric(prediction_start), origin = "1970-01-01"))
+train_data <- model_data |> 
+  dplyr::filter(date <= prediction_start)
+
+# Run gam model
+ gam_mod <- mgcv::gam(
+  formula = cases ~ rR0 + (log_weighted_lagged_cases) + (log_pop_susceptible),
+  family = nb(link = "log"),
+  data = train_data)
+ 
+ # Define rR0 for forecast period
+ # DEBUG: match timeseries lengths
+ get_rR0_forecast <- fiji_2014$rR0[fiji_2014$date>as.Date(prediction_start)][1:horizon]
+ 
+ # Set up testing rows
+prediction_rows <- data.frame(
+  date = as.Date(prediction_start, origin = "1970-01-01") + seq(7,7*horizon, by = 7),
+  date_numeric = max(train_data$date_numeric) + seq(7,7*horizon, by = 7),
+  rR0 = get_rR0_forecast,
+  log_pop_susceptible = rep(tail(train_data$log_pop_susceptible,1), horizon),
+  log_weighted_lagged_cases = rep(tail(train_data$log_weighted_lagged_cases,1), horizon),
+  cases = rep(NA, horizon)
+)
+
+train_test_data <-
+  rbind(train_data |> dplyr::select(date, date_numeric, rR0, log_pop_susceptible, log_weighted_lagged_cases, cases),
+        prediction_rows)
+
+horizon_start <- nrow(train_data) + 1
+horizon_end <- nrow(train_test_data)
+
+# Loop over horizon window
+for(kk in horizon_start:horizon_end){
+  
+  # predict cases
+  cases_out <- predict(gam_mod, train_test_data[1:kk,],type="response",se=TRUE)$fit
+  train_test_data[1:kk,"cases"] <- cases_out
+  
+  # Update other outputs
+  cases_all_na <- train_test_data$cases[!is.na(train_test_data$cases)]
+  cumulative_cases = sum(cases_all_na)
+  pop_susceptible = 1 - pmin(1, (cumulative_cases/pop)/rep_prop)
+  weighted_lagged_cases = weight_cases(cases_all_na)
+  log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001)
+  log_pop_susceptible = log(pop_susceptible + 0.001)
+  
+  if(kk<horizon_end){
+    train_test_data[kk+1,"log_weighted_lagged_cases"] <- tail(log_weighted_lagged_cases,1)
+    train_test_data[kk+1,"log_pop_susceptible"] <- tail(log_pop_susceptible,1)
+  }
+  
+}
+
+col_grad <- colorRampPalette(c("orange", "blue"))(length(prediction_range))
+
+if(prediction_start == min( prediction_dates)){
+  plot(model_data$date,model_data$cases,
+       ylim=c(0,3e3),col="light gray",pch=19,
+       xlab="",ylab="cases")
+}
+points(train_data$date,train_data$cases,col="darkgray",pch=19)
+lines(train_test_data$date,train_test_data$cases,col=col_grad[ii],lwd=2)
+
+#weekly_forecasts[[match(prediction_start,prediction_dates)]] <- train_test_data
+
+}
+```
+
+
+### Further thoughts
+
+TBC
+    
+### References
+[Cori et al, 2013](https://academic.oup.com/aje/article/178/9/1505/89262)  
+[Camacho et al, 2018](https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(18)30230-4/fulltext)  
+[Mellor et al, 2023](https://www.nature.com/articles/s43856-023-00424-4)
+[Siraj et al, 2017](https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0005797)

@@ -42,10 +42,10 @@ One potential use of the {climateR0} package is to use temperature-dependent R0 
 As a case study, we'll use the same data as in the 'Getting Started' vignette. We will forecast confirmed dengue cases from the 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
 
 ```{r}
-input_data <- tahiti_2013
+input_data <- fiji_2014 # tahiti_2013
 
 # Adjust for FP reporting
-input_data$cases <- round(input_data$cases/(input_data$reporting_sites/input_data$total_sites))
+#input_data$cases <- round(input_data$cases/(input_data$reporting_sites/input_data$total_sites))
 
 input_cases <- input_data |> 
   ggplot2::ggplot() +
@@ -83,9 +83,9 @@ weight_cases <- function(x){
 Now we format the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
 
 ```{r}
-#pop <- 378284 # Fiji
-pop <- 190000 # FP
-rep_prop <- 0.2 # Proportion of infections reported as cases
+pop <- 378284 # Fiji
+#pop <- 190000 # FP
+rep_prop <- 0.1 # Proportion of infections reported as cases
 
 if(sum(input_data$cases)/rep_prop > pop){
   stop("Assumed reporting too low, implies more infections than population size")

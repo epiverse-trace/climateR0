@@ -80,38 +80,6 @@ weight_cases <- function(x){
 
 ```
 
-Now we format the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
-
-```{r}
-pop <- 378284 # Fiji
-#pop <- 190000 # FP
-rep_prop <- 0.1 # Proportion of infections reported as cases
-
-if(sum(input_data$cases)/rep_prop > pop){
-  stop("Assumed reporting too low, implies more infections than population size")
-}
-
-model_data <- input_data |> 
-  dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
-  dplyr::arrange(date) |> 
-  dplyr::mutate(cumulative_cases = lag(cumsum(cases),1), 
-                pop_susceptible = 1 - pmax(0, (cumulative_cases/pop)/rep_prop),
-         weighted_lagged_cases = weight_cases(cases),
-         log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001),
-         log_pop_susceptible = log(pop_susceptible + 0.001))
-
-# Set cumulative cases to zero initially
-model_data$cumulative_cases[1] <- 0
-model_data$pop_susceptible[1] <- 1
-model_data$log_pop_susceptible[1] <- log(1 + 0.001)
-
-# Note the below is constrained to match the temperature date range available
-# It also includes a buffer of 5 weeks to account for serial interval calculation above
-prediction_dates <- seq(from = (min(input_data$date) + 5*7), 
-                        to = max(input_data$date), by = 7)
-
-```
-
 ## Forecasting 
 
 First we define a prediction function that uses a step-by-step generative model based on a fitted GAM, with bootstrap parameter uncertainty:
@@ -183,8 +151,8 @@ predict_cases <- function(train_data,
       pop_susceptible = 1 - pmin(1, (cumulative_cases/pop)/rep_prop)
       
       weighted_lagged_cases = tail(weight_cases(c(train_test_new$cases[1:kk],0)),1) # Add padding to calculate
-      log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001)
-      log_pop_susceptible = log(pop_susceptible + 0.001)
+      log_weighted_lagged_cases = log(weighted_lagged_cases + 0.0001)
+      log_pop_susceptible = log(pop_susceptible + 0.0001)
       
       if(kk<horizon_end){
         prediction_bootstrap[kk+1,"log_weighted_lagged_cases",jj] <- tail(log_weighted_lagged_cases,1)
@@ -211,8 +179,11 @@ generate_prediction <- function(model_data,
                                 input_data, #fiji_2014,
                                 prediction_start,
                                 horizon,
-                                n_sim = 1 # Number of bootstrap samples
+                                n_sim = 1, # Number of bootstrap samples
+                                model_in = NULL
                                 ){
+  
+  # DEBUG: model_data = model_data_2017; input_data = fiji_2017; model_in = model_2014
 
   message(paste0("Generating forecasts for prediction week starting: "),
           as.Date(as.numeric(prediction_start), origin = "1970-01-01"))
@@ -223,12 +194,21 @@ generate_prediction <- function(model_data,
     warning("Fewer than 10 weeks of training data, results may be unstable")
   }
   
-  # Run GAM model
-  gam_mod <- mgcv::gam(
-    formula = cases ~ rR0 + (log_weighted_lagged_cases) + (log_pop_susceptible),
-    family = nb(link = "log"),
-    data = train_data)
-   
+  # Run GAM model, or use pre-existing input model
+  # NOTE: Ideally edit to brms so can input priors
+  if(is.null(model_in)){
+    gam_mod <- mgcv::gam(
+                formula = cases ~ offset(log_rR0 + 
+                                  log_weighted_lagged_cases +
+                                  log_pop_susceptible),
+                family = nb(link = "log"),
+                data = train_data)
+  }else{
+    gam_mod <- model_in
+  }
+  
+  # test_pred <- data.frame(log_rR0 = log(0.8), log_weighted_lagged_cases=1.61722, log_pop_susceptible=-0.25)
+
   # Define rR0 for forecast period
   get_rR0_forecast <- input_data$rR0[input_data$date>as.Date(prediction_start)][1:horizon]
    
@@ -237,6 +217,7 @@ generate_prediction <- function(model_data,
       date = as.Date(prediction_start, origin = "1970-01-01") + seq(7,7*horizon, by = 7),
       date_numeric = max(train_data$date_numeric) + seq(7,7*horizon, by = 7),
       rR0 = get_rR0_forecast,
+      log_rR0 = log(get_rR0_forecast + 0.0001),
       log_pop_susceptible = rep(tail(train_data$log_pop_susceptible,1), horizon),
       log_weighted_lagged_cases = rep(tail(train_data$log_weighted_lagged_cases,1), horizon),
       cases = rep(NA, horizon)
@@ -245,10 +226,10 @@ generate_prediction <- function(model_data,
   # Set up variables for first week of forecast
   cumulative_cases <- sum(train_data$cases)
   pop_susceptible <- 1 - pmax(0, (cumulative_cases/pop)/rep_prop)
-  prediction_rows$log_pop_susceptible <- log(pop_susceptible + 0.001)
+  prediction_rows$log_pop_susceptible <- log(pop_susceptible + 0.0001)
   
   weighted_lagged_cases = tail(weight_cases(c(train_data$cases,0)),1)
-  prediction_rows$log_weighted_lagged_cases <- log(weighted_lagged_cases + 0.001)
+  prediction_rows$log_weighted_lagged_cases <- log(weighted_lagged_cases + 0.0001)
 
   # Define training and test data
   train_test_data <-
@@ -277,12 +258,45 @@ generate_prediction <- function(model_data,
                                   n_sim = n_sim # number of simulations
                             )
   
-  prediction_out
+  # Return prediction and model
+  list(prediction_out = prediction_out, model_out = gam_mod)
 
 }
 ```
+Now we format the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
 
-With the model in place, we generate N-week ahead forecasts for a given prediction date:
+```{r}
+pop <- 378284 # Fiji
+#pop <- 190000 # FP
+rep_prop <- 0.1 # Proportion of infections reported as cases
+
+if(sum(input_data$cases)/rep_prop > pop){
+  stop("Assumed reporting too low, implies more infections than population size")
+}
+
+model_data <- input_data |> 
+  dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
+  dplyr::arrange(date) |> 
+  dplyr::mutate(log_rR0 = log(rR0 + 0.0001),
+         cumulative_cases = lag(cumsum(cases),1), 
+         pop_susceptible = 1 - pmax(0, (cumulative_cases/pop)/rep_prop),
+         weighted_lagged_cases = weight_cases(cases),
+         log_weighted_lagged_cases = log(weighted_lagged_cases + 0.0001),
+         log_pop_susceptible = log(pop_susceptible + 0.0001))
+
+# Set cumulative cases to zero initially
+model_data$cumulative_cases[1] <- 0
+model_data$pop_susceptible[1] <- 1
+model_data$log_pop_susceptible[1] <- log(1 + 0.0001)
+
+# Note the below is constrained to match the temperature date range available
+# It also includes a buffer of 5 weeks to account for serial interval calculation above
+prediction_dates <- seq(from = (min(input_data$date) + 5*7), 
+                        to = max(input_data$date), by = 7)
+
+```
+
+With the model and data in place, we generate N-week ahead forecasts for a given prediction date:
 ```{r, echo = T}
 # Set seed for reproducibility
 set.seed(123)  
@@ -298,7 +312,7 @@ if(length(prediction_dates)<horizon){
 # Choose range of indices to define the end of the real-time fitting period,
 # and start of prediction period
 prediction_range <- prediction_dates[1:(length(prediction_dates)-horizon)]
-prediction_vals <- prediction_range[seq(4,10,2)]
+prediction_vals <- prediction_range[seq(4,20,2)]
 
 # Check prediction values value
 if(sum(is.na(prediction_vals))>0){
@@ -316,13 +330,14 @@ for(ii in 1:length(prediction_vals)){
   
   prediction_start <- prediction_vals[ii]
   
-  prediction_out <- generate_prediction(model_data,
+  generate_output <- generate_prediction(model_data,
                                   input_data = input_data,
                                   prediction_start,
                                   horizon,
                                   n_sim = 50 # Number of bootstrap samples
                                   )
   
+  prediction_out <- generate_output$prediction_out
   cases_data <- prediction_out[,"cases_sim",]
 
   summary_stats <- data.frame(
@@ -388,7 +403,124 @@ combined_plots <- wrap_plots(plot_list)
 ggsave("combined_plots.pdf", plot = combined_plots,width=10,height=8)
 ```
 
+### Apply model to 2017 DENV-2 outbreak
 
+As well as calibrating a model from scratch, we can use a model fitted to all the 2014 epidemic data for a future outbreak. First we use climate trends from 2014 to add temperature data and rR0 columns to a dataset for the 2017 DENV-2 outbreak in Fiji:
+```{r}
+# Function to find closest matching day of the year in vec2 
+# for values in vec1
+find_closest_days <- function(vec1,vec2){
+
+  doy1 <- as.numeric(format(vec1, "%j"))
+  doy2 <- as.numeric(format(vec2, "%j"))
+  
+  sapply(doy1, function(doy){
+   closest_index <- which.min(abs(doy1 - doy))
+   closest_index
+  })
+}
+
+match_dates <- find_closest_days(fiji_2017$date,fiji_2014$date)
+
+fiji_2017$av_temp <- fiji_2014$av_temp[match_dates]
+fiji_2017$rR0 <- temperature_r0(fiji_2017$av_temp, "AeaeDENV")
+```
+Then we create the `model_data` object for this outbreak:
+```{r}
+model_data_2017 <- fiji_2017 |> 
+  dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
+  dplyr::arrange(date) |> 
+  dplyr::mutate(log_rR0 = log(rR0 + 0.0001),
+         cumulative_cases = lag(cumsum(cases),1), 
+         pop_susceptible = 1 - pmax(0, (cumulative_cases/pop)/rep_prop),
+         weighted_lagged_cases = weight_cases(cases),
+         log_weighted_lagged_cases = log(weighted_lagged_cases + 0.0001),
+         log_pop_susceptible = log(pop_susceptible + 0.0001))
+
+# Set cumulative cases to zero initially
+model_data_2017$cumulative_cases[1] <- 0
+model_data_2017$pop_susceptible[1] <- 1
+model_data_2017$log_pop_susceptible[1] <- log(1 + 0.0001)
+
+# Note the below is constrained to match the temperature date range available
+# It also includes a buffer of 5 weeks to account for serial interval calculation above
+prediction_dates_2017 <- seq(from = (min(fiji_2017$date) + 5*7), 
+                        to = max(fiji_2017$date), by = 7)
+```
+
+Now we run a forecast from an early prediction date (i.e. first available in 2017), using a later version of 2014 forecast model (i.e. calibrated to more data).
+```{r}
+prediction_start <- prediction_dates_2017[15]
+
+model_2014 <- generate_output$model_out
+
+generate_output <- generate_prediction(model_data_2017,
+                                input_data = fiji_2017,
+                                prediction_start,
+                                horizon,
+                                n_sim = 50
+                                #model_in = model_2014 # Use model from final 2014 forecast
+                                )
+
+prediction_out <- generate_output$prediction_out
+cases_data <- prediction_out[,"cases_sim",]
+
+```
+We then plot the results
+```{r}
+summary_stats <- data.frame(
+  date =   as.Date(prediction_out[,"date",1]),
+  median = apply(cases_data, 1, median),
+  lower50 = apply(cases_data, 1, quantile, probs = 0.25, na.rm = T),
+  upper50 = apply(cases_data, 1, quantile, probs = 0.75, na.rm = T),
+  lower90 = apply(cases_data, 1, quantile, probs = 0.05, na.rm = T),
+  upper90 = apply(cases_data, 1, quantile, probs = 0.95, na.rm = T)
+)
+
+# Define training window
+train_dataset <- model_data_2017[model_data_2017$date<=prediction_start,]
+
+p1 <- ggplot(summary_stats,
+       aes(x = date)) +
+      geom_ribbon(aes(ymin = lower90,
+                ymax = upper90,
+                fill="90% PI")) +
+      geom_ribbon(aes(ymin = lower50,
+                  ymax = upper50,
+                  fill="50% PI")) +
+      geom_line(aes( y= median,
+                 color = "Forecast"),
+        linewidth = 1
+        ) +
+      geom_point(data = model_data_2017,
+                 aes(x = date,
+                 y = cases,
+                 color = "Data (all)"),
+                 ) +
+      geom_point(data = train_dataset,
+               aes(x = date,
+               y = cases,
+               color = "Data (real-time)")
+               ) +
+      scale_color_manual(values=c("Forecast"=rgb(0,0.5,0.8),
+                                  "Data (all)" = "grey",
+                                  "Data (real-time)" = "black")
+      ) +
+      scale_fill_manual(values=c("90% PI"=rgb(0.8,0.95,1),
+                             "50% PI"=rgb(0.6,0.85,1))
+                    ) +
+      coord_cartesian(ylim=c(0,150)) +
+      guides(fill="none",
+             color="none") +
+      labs(color=NULL,fill=NULL,
+           title = paste0("Forecast start: ",prediction_start),
+           x=NULL,
+           y="cases") +
+      theme_minimal() +
+      theme(legend.position = c(0.8,0.8))
+
+print(p1)
+```
 
 ### Further thoughts
 

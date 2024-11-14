@@ -417,6 +417,7 @@ Then plot the combined plots
 ```{r}
 combined_plots <- wrap_plots(plot_list)
 
+print(combined_plots)
 
 ggsave("combined_plots.pdf", plot = combined_plots,width=10,height=8)
 ```
@@ -426,7 +427,7 @@ ggsave("combined_plots.pdf", plot = combined_plots,width=10,height=8)
 As well as calibrating a model from scratch, we can use a model fitted to all the 2014 epidemic data for a future outbreak. First we use climate trends from 2014 to add temperature data and rR0 columns to a dataset for the 2017 DENV-2 outbreak in Fiji:
 
 **NOTE: The below dataset is not yet properly loaded in the online package, so this code is in development**
-```{r}
+```{r, eval=FALSE}
 # Function to find closest matching day of the year in vec2 
 # for values in vec1
 find_closest_days <- function(vec1,vec2){
@@ -543,7 +544,7 @@ print(p1)
 ggsave("combined_plot_D2_2017.pdf", plot = p1,width=4,height=2)
 ```
 
-### Further options for developed
+### Further options for developement
 
 * Need better handling of uncertainty across multiple outbreaks, e.g. by using {brms} to make posterior of outbreak 1 the prior for outbreak 2.
 

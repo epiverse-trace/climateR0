@@ -212,7 +212,7 @@ generate_prediction <- function(model_data,
     gam_mod <- model_in
   }
   
-  # DEBUG: test_pred <- data.frame(log_rR0 = log(0.2), log_weighted_lagged_cases=log(100), log_pop_susceptible=log(1)); predict(gam_mod,test_pred, type = "response")
+  # DEBUG: test_pred <- data.frame(log_rR0 = log(0.5), log_weighted_lagged_cases=log(100), log_pop_susceptible=log(1)); predict(gam_mod,test_pred, type = "response")
 
   # Define rR0 for forecast period
   get_rR0_forecast <- input_data$rR0[input_data$date>as.Date(prediction_start)][1:horizon]
@@ -342,6 +342,7 @@ for(ii in 1:length(prediction_vals)){
                                   n_sim = 50 # Number of bootstrap samples
                                   )
   
+  # Get case predictions
   prediction_out <- generate_output$prediction_out
   cases_data <- prediction_out[,"cases_sim",]
 
@@ -354,6 +355,11 @@ for(ii in 1:length(prediction_vals)){
     upper90 = apply(cases_data, 1, quantile, probs = 0.95, na.rm = T)
   )
   
+  # Get intercept for R0 prediction
+  r0_out <- exp(generate_output$model_out$coefficients[1])
+  r0_estimate = data.frame(date = input_data$date,
+                          r0_est = input_data$rR0*r0_out)
+        
   # Define training window
   train_dataset <- model_data[model_data$date<=prediction_start,]
   
@@ -379,9 +385,15 @@ for(ii in 1:length(prediction_vals)){
                  y = cases,
                  color = "Data (real-time)")
                  ) +
+        geom_line(data = r0_estimate,
+                  aes(x = date,
+                      y = 300*r0_est,
+                      color = "R0 estimate")
+                  ) +
         scale_color_manual(values=c("Forecast"=rgb(0,0.5,0.8),
                                     "Data (all)" = "grey",
-                                    "Data (real-time)" = "black")
+                                    "Data (real-time)" = "black",
+                                    "R0 estimate" = "blue")
         ) +
         scale_fill_manual(values=c("90% PI"=rgb(0.8,0.95,1),
                                "50% PI"=rgb(0.6,0.85,1))

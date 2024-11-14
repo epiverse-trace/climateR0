@@ -14,8 +14,9 @@ vignette: >
 Note: this vignette builds on the `gam-forecasting-workflow.Rmd` vignette, focusing on longer term simulations, projecting cases using the fitted GAM at each time step, then uses these cases to generate new values of susceptibles and lagged cases to project the next step.
 
 Some other changes:  
-* The GAM is now more constrained, removing the `s()` terms for fixed terms, which should be reasonable given the linear relationship between R0 and rR0 scaling
+* The GAM is now more constrained, removing the `s()` terms for fixed terms, which should be reasonable given the linear relationship between R0 and rR0 scaling.
 * A log link has been added to ensure outcome is reflected as $log(E[I_t])$
+* A log transform has been added to $R_0$.
 * Exploratory code for a `temperature_gt` that uses the Siraj et al temperature-dependent generation interval
 
 ```{r, include = FALSE}
@@ -423,6 +424,8 @@ ggsave("combined_plots.pdf", plot = combined_plots,width=10,height=8)
 ### Apply model to 2017 DENV-2 outbreak
 
 As well as calibrating a model from scratch, we can use a model fitted to all the 2014 epidemic data for a future outbreak. First we use climate trends from 2014 to add temperature data and rR0 columns to a dataset for the 2017 DENV-2 outbreak in Fiji:
+
+**NOTE: The below dataset is not yet properly loaded in the online package, so this code is in development**
 ```{r}
 # Function to find closest matching day of the year in vec2 
 # for values in vec1
@@ -443,7 +446,7 @@ fiji_2017$av_temp <- fiji_2014$av_temp[match_dates]
 fiji_2017$rR0 <- temperature_r0(fiji_2017$av_temp, "AeaeDENV")
 ```
 Then we create the `model_data` object for this outbreak:
-```{r}
+```{r, eval=FALSE}
 model_data_2017 <- fiji_2017 |> 
   dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
   dplyr::arrange(date) |> 
@@ -466,7 +469,7 @@ prediction_dates_2017 <- seq(from = (min(fiji_2017$date) + 5*7),
 ```
 
 Now we run a forecast from an early prediction date (i.e. first available in 2017), using a later version of 2014 forecast model (i.e. calibrated to more data).
-```{r}
+```{r, eval=FALSE}
 prediction_start <- prediction_dates_2017[10]
 
 model_2014 <- generate_output$model_out
@@ -484,7 +487,7 @@ cases_data <- prediction_out[,"cases_sim",]
 
 ```
 We then plot the results
-```{r}
+```{r, eval=FALSE}
 summary_stats <- data.frame(
   date =   as.Date(prediction_out[,"date",1]),
   median = apply(cases_data, 1, median),
@@ -540,12 +543,12 @@ print(p1)
 ggsave("combined_plot_D2_2017.pdf", plot = p1,width=4,height=2)
 ```
 
-### Further thoughts
+### Further options for developed
 
-* Need better handling of uncertainty in propagated outbreaks
+* Need better handling of uncertainty across multiple outbreaks, e.g. by using {brms} to make posterior of outbreak 1 the prior for outbreak 2.
 
 * Potential for temperature-dependent generation interval:
-```{r}
+```{r, eval=FALSE}
 weight_cases_temp <- function(x, weight_vals){
   weighted_cases <- lag(x,2)*weight_vals[2] + 
                     lag(x,3)*weight_vals[3] + 

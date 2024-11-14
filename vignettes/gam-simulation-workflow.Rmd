@@ -124,14 +124,19 @@ predict_cases <- function(train_data,
       coef_sim <- mvrnorm(1, mu = coef_mean, Sigma = vcov_matrix)
       
       # Compute the linear predictor with the new coefficients
-      linear_predictor <- model.matrix(gam_mod, newdata = train_test_data_kk) %*% coef_sim
+      design_matrix <- model.matrix(gam_mod, newdata = train_test_data_kk)
+      
+      linear_predictor <- design_matrix %*% coef_sim + 
+                          train_test_data_kk$log_rR0 + 
+                          train_test_data_kk$log_weighted_lagged_cases #+ 
+                          #train_test_data_kk$log_pop_susceptible
       
       # Transform to the response scale (mean counts) using the inverse log-link
       predicted_means <- exp(linear_predictor)
       
       # Generate simulated counts from the expectation
-      # Note: we use expecation because interested in underlying dynamics
-      new_simulation <- predicted_means
+      # Note: we use expectation because interested in underlying dynamics
+      new_simulation <- predicted_means #exp(original_means)
 
       # Record full range of simulated cases
       if(kk==horizon_start){
@@ -199,15 +204,15 @@ generate_prediction <- function(model_data,
   if(is.null(model_in)){
     gam_mod <- mgcv::gam(
                 formula = cases ~ offset(log_rR0 + 
-                                  log_weighted_lagged_cases +
-                                  log_pop_susceptible),
+                                  log_weighted_lagged_cases) +
+                                  log_pop_susceptible,
                 family = nb(link = "log"),
                 data = train_data)
   }else{
     gam_mod <- model_in
   }
   
-  # test_pred <- data.frame(log_rR0 = log(0.8), log_weighted_lagged_cases=1.61722, log_pop_susceptible=-0.25)
+  # DEBUG: test_pred <- data.frame(log_rR0 = log(0.2), log_weighted_lagged_cases=log(100), log_pop_susceptible=log(1)); predict(gam_mod,test_pred, type = "response")
 
   # Define rR0 for forecast period
   get_rR0_forecast <- input_data$rR0[input_data$date>as.Date(prediction_start)][1:horizon]
@@ -233,7 +238,7 @@ generate_prediction <- function(model_data,
 
   # Define training and test data
   train_test_data <-
-    rbind(train_data |> dplyr::select(date, date_numeric, rR0, 
+    rbind(train_data |> dplyr::select(date, date_numeric, rR0, log_rR0,
                                       log_pop_susceptible, log_weighted_lagged_cases, cases),
           prediction_rows)
   
@@ -266,7 +271,7 @@ generate_prediction <- function(model_data,
 Now we format the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
 
 ```{r}
-pop <- 378284 # Fiji
+pop <- 342000 # Fiji
 #pop <- 190000 # FP
 rep_prop <- 0.1 # Proportion of infections reported as cases
 
@@ -415,7 +420,7 @@ find_closest_days <- function(vec1,vec2){
   doy2 <- as.numeric(format(vec2, "%j"))
   
   sapply(doy1, function(doy){
-   closest_index <- which.min(abs(doy1 - doy))
+   closest_index <- which.min(abs(doy2 - doy))
    closest_index
   })
 }
@@ -450,7 +455,7 @@ prediction_dates_2017 <- seq(from = (min(fiji_2017$date) + 5*7),
 
 Now we run a forecast from an early prediction date (i.e. first available in 2017), using a later version of 2014 forecast model (i.e. calibrated to more data).
 ```{r}
-prediction_start <- prediction_dates_2017[15]
+prediction_start <- prediction_dates_2017[10]
 
 model_2014 <- generate_output$model_out
 
@@ -458,8 +463,8 @@ generate_output <- generate_prediction(model_data_2017,
                                 input_data = fiji_2017,
                                 prediction_start,
                                 horizon,
-                                n_sim = 50
-                                #model_in = model_2014 # Use model from final 2014 forecast
+                                n_sim = 50,
+                                model_in = model_2014 # Use model from final 2014 forecast
                                 )
 
 prediction_out <- generate_output$prediction_out
@@ -509,7 +514,7 @@ p1 <- ggplot(summary_stats,
       scale_fill_manual(values=c("90% PI"=rgb(0.8,0.95,1),
                              "50% PI"=rgb(0.6,0.85,1))
                     ) +
-      coord_cartesian(ylim=c(0,150)) +
+      coord_cartesian(ylim=c(0,500)) +
       guides(fill="none",
              color="none") +
       labs(color=NULL,fill=NULL,
@@ -520,6 +525,7 @@ p1 <- ggplot(summary_stats,
       theme(legend.position = c(0.8,0.8))
 
 print(p1)
+ggsave("combined_plot_D2_2017.pdf", plot = p1,width=4,height=2)
 ```
 
 ### Further thoughts

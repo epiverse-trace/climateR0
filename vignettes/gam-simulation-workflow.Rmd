@@ -43,7 +43,7 @@ One potential use of the {climateR0} package is to use temperature-dependent R0 
 As a case study, we'll use the same data as in the 'Getting Started' vignette. We will forecast confirmed dengue cases from the 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
 
 ```{r}
-input_data <- fiji_2014 # tahiti_2013
+input_data <- fiji_2014
 
 # Adjust for FP reporting
 #input_data$cases <- round(input_data$cases/(input_data$reporting_sites/input_data$total_sites))
@@ -59,7 +59,7 @@ input_cases
 
 ```
 
-## Model set-up
+## Set up relative R0 and serial interval
 
 First, we calculate temperature-dependent R0 values using mean temperature.
 
@@ -81,7 +81,9 @@ weight_cases <- function(x){
 
 ```
 
-## Forecasting 
+## Set up forecasting model
+
+### Forward prediction for specific time point and model
 
 First we define a prediction function that uses a step-by-step generative model based on a fitted GAM, with bootstrap parameter uncertainty:
 ```{r}
@@ -179,6 +181,8 @@ predict_cases <- function(train_data,
 }
 ```
 
+### Fit model for specific prediction date and run forward simulation
+
 Next, we step up a model function to generate predictions for a specific forecasting window, by fitting a GAM to early data then using the `predict_cases` function to forecast:
 ```{r}
 generate_prediction <- function(model_data,
@@ -269,6 +273,9 @@ generate_prediction <- function(model_data,
 
 }
 ```
+
+## Fiji 2014 dengue forecast
+
 Now we format the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
 
 ```{r}
@@ -303,7 +310,7 @@ prediction_dates <- seq(from = (min(input_data$date) + 5*7),
 ```
 
 With the model and data in place, we generate N-week ahead forecasts for a given prediction date:
-```{r, echo = T}
+```{r, message=FALSE, warning=FALSE}
 # Set seed for reproducibility
 set.seed(123)  
 
@@ -386,20 +393,20 @@ for(ii in 1:length(prediction_vals)){
                  y = cases,
                  color = "Data (real-time)")
                  ) +
-        geom_line(data = r0_estimate,
-                  aes(x = date,
-                      y = 300*r0_est,
-                      color = "R0 estimate")
-                  ) +
+        # geom_line(data = r0_estimate,
+        #           aes(x = date,
+        #               y = 300*r0_est,
+        #               color = "R0 estimate")
+        #           ) +
         scale_color_manual(values=c("Forecast"=rgb(0,0.5,0.8),
                                     "Data (all)" = "grey",
-                                    "Data (real-time)" = "black",
-                                    "R0 estimate" = "blue")
+                                    "Data (real-time)" = "black")
+                                    #"R0 estimate" = "blue")
         ) +
         scale_fill_manual(values=c("90% PI"=rgb(0.8,0.95,1),
                                "50% PI"=rgb(0.6,0.85,1))
                       ) +
-        coord_cartesian(ylim=c(0,5e3)) +
+        coord_cartesian(ylim=c(0,2e3)) +
         guides(fill="none",
                color="none") +
         labs(color=NULL,fill=NULL,
@@ -422,7 +429,7 @@ print(combined_plots)
 ggsave("combined_plots.pdf", plot = combined_plots,width=10,height=8)
 ```
 
-### Apply model to 2017 DENV-2 outbreak
+## Apply 2014 model to 2017 DENV-2 outbreak
 
 As well as calibrating a model from scratch, we can use a model fitted to all the 2014 epidemic data for a future outbreak. First we use climate trends from 2014 to add temperature data and rR0 columns to a dataset for the 2017 DENV-2 outbreak in Fiji:
 

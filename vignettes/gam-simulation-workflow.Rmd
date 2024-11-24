@@ -125,6 +125,8 @@ predict_cases <- function(train_data,
                           train_test_data,
                           prediction_bootstrap,
                           gam_mod,
+                          pop,
+                          rep_prop,
                           n_sim = 100, # Number of simulations
                           fix_susceptible
                           ){
@@ -226,6 +228,8 @@ generate_prediction <- function(model_data,
                                 input_data,
                                 prediction_start,
                                 horizon,
+                                pop,
+                                rep_pop,
                                 n_sim = 1, # Number of bootstrap samples
                                 model_in = NULL,
                                 fix_susceptible = FALSE
@@ -312,6 +316,8 @@ generate_prediction <- function(model_data,
                                   train_test_data, # Training + test window
                                   prediction_bootstrap, # Array for storage
                                   gam_mod, # Fitted GAM
+                                  pop, # Population size
+                                  rep_prop, # Reported fraction
                                   n_sim = n_sim, # Number of simulations
                                   fix_susceptible # SIR-like model = T/F
                             )
@@ -376,10 +382,13 @@ find_closest_days <- function(vec1,vec2){
 Now we format the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
 
 ```{r}
+population_central_division_fiji <- 342000
+proportion_reported <- 0.1
+
 # Prepare data for analysis
 prepare_data_out <- prepare_data(input_data,
-                                 pop = 342000, # Assumed population for Central Division
-                                 rep_prop <- 0.1 # Assumed proportion of infections reported
+                                 pop = population_central_division_fiji, # Assumed population for Central Division
+                                 rep_prop = proportion_reported # Assumed proportion of infections reported
                                  )
 
 # Define data for the model
@@ -417,6 +426,8 @@ for(ii in 1:length(prediction_vals)){
                                   input_data = input_data, # Original data
                                   prediction_start, # Forecst start date
                                   horizon = forecast_horizon, # Forecast window
+                                  pop = population_central_division_fiji,
+                                  rep_pop = proportion_reported,
                                   n_sim = 50, # Number of bootstrap samples
                                   fix_susceptible = F # Constrain to be SIR-like 
                                   )

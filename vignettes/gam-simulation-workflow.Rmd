@@ -229,7 +229,7 @@ generate_prediction <- function(model_data,
                                 prediction_start,
                                 horizon,
                                 pop,
-                                rep_pop,
+                                rep_prop,
                                 n_sim = 1, # Number of bootstrap samples
                                 model_in = NULL,
                                 fix_susceptible = FALSE
@@ -427,7 +427,7 @@ for(ii in 1:length(prediction_vals)){
                                   prediction_start, # Forecst start date
                                   horizon = forecast_horizon, # Forecast window
                                   pop = population_central_division_fiji,
-                                  rep_pop = proportion_reported,
+                                  rep_prop = proportion_reported,
                                   n_sim = 50, # Number of bootstrap samples
                                   fix_susceptible = F # Constrain to be SIR-like 
                                   )
@@ -438,7 +438,7 @@ for(ii in 1:length(prediction_vals)){
 
   # Summarise estimates of cases over time
   summary_stats <- data.frame(
-    date =   as.Date(prediction_out[,"date",1]),
+    date =   as.Date(prediction_out[,"date",1], origin = "1970-01-01"),
     median = apply(cases_data, 1, median),
     lower50 = apply(cases_data, 1, quantile, probs = 0.25, na.rm = T),
     upper50 = apply(cases_data, 1, quantile, probs = 0.75, na.rm = T),

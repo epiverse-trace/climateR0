@@ -29,7 +29,7 @@ You can install the development version of packagetemplate from
 
 ``` r
 # install.packages("pak")
-pak::pak("EmilieFinch/climateR0")
+pak::pak("epiverse-trace/climateR0")
 ```
 
 ## Example
@@ -37,7 +37,7 @@ pak::pak("EmilieFinch/climateR0")
 ### Contributions
 
 Contributions are welcome via [pull
-requests](https://github.com/EmilieFinch/climateR0/pulls).
+requests](https://github.com/epiverse-trace/climateR0/pulls).
 
 ### Code of Conduct
 

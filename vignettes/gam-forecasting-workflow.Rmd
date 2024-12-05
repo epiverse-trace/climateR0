@@ -81,7 +81,7 @@ model_data <- fiji_2014 |>
          log_pop_susceptible = log(pop_susceptible + 0.001))
 
 horizon <- 2
-prediction_dates <- seq(from = as.Date("2014-01-06"), to = as.Date("2014-09-01"), by = 7)
+prediction_dates <- seq(from = as.Date("2014-02-06"), to = as.Date("2014-09-01"), by = 7)
 
 ```
 
@@ -94,6 +94,8 @@ all_forecasts <- NULL
 weekly_forecasts <- NULL
 
 for(prediction_start in prediction_dates){ 
+  
+prediction_start <- as.Date(prediction_start)
 
 message(paste0("Generating forecasts for prediction week starting: "), as.Date(prediction_start, origin = "1970-01-01"))
 train_data <- model_data |> 
@@ -116,7 +118,7 @@ prediction_rows <- data.frame(
 )
 
 train_test_data <-
-  rbind(train_data |> select(date, date_numeric, rR0, log_pop_susceptible, log_weighted_lagged_cases, cases),
+  rbind(train_data |> dplyr::select(date, date_numeric, rR0, log_pop_susceptible, log_weighted_lagged_cases, cases),
         prediction_rows)
 
 # Generate samples from posterior estimates

@@ -1,12 +1,12 @@
 ---
-title: "Example workflow for longer-term simulation with relative R0"
+title: "Longer simulation-based forecasting with relative R0"
 output: 
   html_document:
       toc: true
       toc_float: true
       code_folding: show
 vignette: >
-  %\VignetteIndexEntry{gam-forecasting-workflow}
+  %\VignetteIndexEntry{Longer simulation-based forecasting with relative R0}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

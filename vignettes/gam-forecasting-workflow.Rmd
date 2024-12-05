@@ -70,6 +70,8 @@ weight_cases <- function(x){
 Now we wrangle the Fiji 2014 data for forecasting and set our forecast horizon (how many weeks ahead we want to forecast) and the dates we would like our forecasts to start from.
 
 ```{r}
+pop <- 342000
+  
 model_data <- fiji_2014 |> 
   dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
   dplyr::arrange(date) |> 
@@ -88,7 +90,6 @@ prediction_dates <- seq(from = as.Date("2014-01-06"), to = as.Date("2014-09-01")
 We now generate 2-week ahead forecasts for each of our prediction dates.
 
 ```{r}
-
 all_forecasts <- NULL 
 weekly_forecasts <- NULL
 

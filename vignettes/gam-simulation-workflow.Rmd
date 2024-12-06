@@ -128,7 +128,7 @@ predict_cases <- function(train_data,
                           pop,
                           rep_prop,
                           n_sim = 100, # Number of simulations
-                          fix_susceptible
+                          fix_all_covariates
                           ){
   
   # Define prediction window
@@ -166,7 +166,7 @@ predict_cases <- function(train_data,
       design_matrix <- model.matrix(gam_mod, newdata = train_test_data_kk)
       
       # Specify prediction depending on whether susceptible term has a coefficient
-      if(fix_susceptible==TRUE){
+      if(fix_all_covariates==TRUE){
         linear_predictor <- design_matrix %*% coef_sim + 
                             train_test_data_kk$log_rR0 + 
                             train_test_data_kk$log_weighted_lagged_cases + 
@@ -174,7 +174,7 @@ predict_cases <- function(train_data,
       }else{
         linear_predictor <- design_matrix %*% coef_sim + 
                             train_test_data_kk$log_rR0 + 
-                            train_test_data_kk$log_weighted_lagged_cases
+                            train_test_data_kk$log_pop_susceptible
       }
       
       # Transform to the response scale (mean counts) using the inverse log-link
@@ -232,7 +232,7 @@ generate_prediction <- function(model_data,
                                 rep_prop,
                                 n_sim = 1, # Number of bootstrap samples
                                 model_in = NULL,
-                                fix_susceptible = FALSE
+                                fix_all_covariates = FALSE
                                 ){
   
   # DEBUG: model_data = model_data_2024; input_data = fp_incidence
@@ -250,7 +250,7 @@ generate_prediction <- function(model_data,
   # NOTE: Ideally edit to brms so can input priors
   if(is.null(model_in)){
     # Check whether susceptible term is fixed (i.e. SIR-like) or flexible
-    if(fix_susceptible==TRUE){
+    if(fix_all_covariates==TRUE){
       gam_mod <- mgcv::gam(
                   formula = cases ~ offset(log_rR0 + 
                                     log_weighted_lagged_cases +
@@ -260,8 +260,8 @@ generate_prediction <- function(model_data,
     }else{
       gam_mod <- mgcv::gam(
                   formula = cases ~ offset(log_rR0 + 
-                                    log_weighted_lagged_cases) +
-                                    log_pop_susceptible,
+                                    log_pop_susceptible) +
+                                    log_weighted_lagged_cases,
                   family = nb(link = "log"),
                   data = train_data)
     }
@@ -319,7 +319,7 @@ generate_prediction <- function(model_data,
                                   pop, # Population size
                                   rep_prop, # Reported fraction
                                   n_sim = n_sim, # Number of simulations
-                                  fix_susceptible # SIR-like model = T/F
+                                  fix_all_covariates # SIR-like model = T/F
                             )
   
   # Return prediction and model
@@ -429,7 +429,7 @@ for(ii in 1:length(prediction_vals)){
                                   pop = population_central_division_fiji,
                                   rep_prop = proportion_reported,
                                   n_sim = 50, # Number of bootstrap samples
-                                  fix_susceptible = F # Constrain to be SIR-like 
+                                  fix_all_covariates = F # Constrain to be SIR-like 
                                   )
   
   # Get case predictions

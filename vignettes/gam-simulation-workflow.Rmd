@@ -1,5 +1,5 @@
 ---
-title: "Longer simulation-based forecasting with relative R0"
+title: "Longer simulation-based forecasting with relative R0 (raw version with no functions)"
 output: 
   html_document:
       toc: true

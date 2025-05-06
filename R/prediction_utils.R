@@ -74,6 +74,7 @@ predict_cases <- function(train_data,
       train_test_data_kk <- data.frame(prediction_bootstrap[1:kk,,index_sample])
       
       # Predicted means based on original model
+      original_means <- predict(gam_mod, newdata = train_test_data_kk, type = "link")
       
       # Get the variance-covariance matrix of the model coefficients
       vcov_matrix <- vcov(gam_mod)

@@ -26,8 +26,10 @@ library(climateR0)
 library(here)
 library(mgcv)
 library(dplyr)
-library(gratia)
 library(ggplot2)
+require(data.table)
+load(here::here("data", "epidemicGrowth.RData"))
+
 ```
 
 One potential use of the {climateR0} package is to use temperature-dependent R0 values as an input within a short-term forecasting model. In this vignette we outline an example using a generalised additive model, implemented in the `mgcv` package. 
@@ -35,13 +37,13 @@ One potential use of the {climateR0} package is to use temperature-dependent R0 
 As a case study, we'll use the same data as in the 'Getting Started' vignette. We will forecast confirmed dengue cases from the 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
 
 ```{r}
+
 fiji_cases <- fiji_2014 |> 
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
   ggplot2::labs(x = "Date", y = "Cases") +
   ggplot2::theme_classic()
-
 fiji_cases
 
 ```
@@ -57,13 +59,40 @@ fiji_2014$rR0 <- temperature_r0(fiji_2014$av_temp, "AeaeDENV")
 We next define a function to weight lagged cases by the dengue serial interval.
 
 ```{r}
-# Function to weight past cases by dengue serial interval
+daily_dt <- weekly_to_daily_temps_function(fiji_2014)
+#Times we can estimate SI
+fitting_dt <- fitting_data_table_function(daily_dt)
+fitting_dt
+number_mc_samples <- 100
 # From Siraj et al 2017
+siraj_2017_params <- set_siraj_2017_params()
+daily_gi_samples_dt <- run_time_varying_monte_carlo(number_mc_samples = number_mc_samples,
+           all_data = daily_dt,
+           fitting_data = fitting_dt,
+           siraj_2017_params)
+print(tail(daily_gi_samples_dt))
+summary_daily_gi_samples_dt <- daily_gi_samples_dt[, list(MEDIAN = median(value),
+    Q_0.025 = quantile(value, 0.025),
+    Q_0.975 = quantile(value, 0.975)), by = c("TIME")]
+ggplot(summary_daily_gi_samples_dt)+ geom_ribbon(aes(x = TIME, ymin = Q_0.025, ymax = Q_0.975), fill = "#8e0152", alpha = 0.5) +
+  geom_line(aes(x = TIME, y = MEDIAN), col = "#276419") +
+  labs(x = "Date", y = "Serial interval (days)") +
+  theme_classic()
+# Calculate SI for given date (relies on daily temperature data), SI then binned to weekly
+max(daily_gi_samples_dt$TIME)
 
-weight_cases <- function(x){
-  weighted_cases <- lag(x,2)*0.2 + lag(x,3)*0.425 + lag(x,4)*0.25 + lag(x,5)*0.125
-  return(weighted_cases)
-}
+weekly_gi_samples_dt <- weekly_si_from_daily_si_function(daily_gi_samples_dt)
+fitting_dt <- subset(fitting_dt, EVALUATE == TRUE)
+fitting_dt <- data.table(fitting_dt)
+fitting_dt
+# fitting_dt[which(cases == 0), cases:= 0]
+si_cases_dt <- weight_cases(weekly_gi_samples_dt, fitting_dt)
+print(si_cases_dt)
+# Function to weight past cases by estimated dengue serial interval
+# weight_cases <- function(x){
+#   weighted_cases <- lag(x,2)*0.2 + lag(x,3)*0.425 + lag(x,4)*0.25 + lag(x,5)*0.125
+#   return(weighted_cases)
+# }
 
 ```
 
@@ -71,14 +100,22 @@ Now we wrangle the Fiji 2014 data for forecasting and set our forecast horizon (
 
 ```{r}
 pop <- 342000
-  
-model_data <- fiji_2014 |> 
+head(model_data)
+model_data <- si_cases_dt |> 
   dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
   dplyr::arrange(date) |> 
   dplyr::mutate(cumulative_cases = cumsum(cases), pop_susceptible = 1 - (cumulative_cases/pop),
-         weighted_lagged_cases = weight_cases(cases),
+         weighted_cases = weighted_lagged_cases,
          log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001),
          log_pop_susceptible = log(pop_susceptible + 0.001))
+
+# model_data <- fiji_2014 |> 
+#   dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
+#   dplyr::arrange(date) |> 
+#   dplyr::mutate(cumulative_cases = cumsum(cases), pop_susceptible = 1 - (cumulative_cases/pop),
+#          weighted_lagged_cases = weight_cases(cases),
+#          log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001),
+#          log_pop_susceptible = log(pop_susceptible + 0.001))
 
 horizon <- 2
 prediction_dates <- seq(from = as.Date("2014-02-06"), to = as.Date("2014-09-01"), by = 7)

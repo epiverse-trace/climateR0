@@ -35,6 +35,13 @@ library(dplyr)
 library(ggplot2)
 library(MASS)
 library(patchwork)
+library(here)
+require(data.table)
+require(tidyr)
+require(zoo)
+load(here::here("data", "epidemicGrowth.RData"))
+source(here::here("R", "serial_interval.R"))
+
 ```
 
 One potential use of the {climateR0} package is to use temperature-dependent R0 values as an input within a short-term forecasting model. In this vignette we outline an example using a generalised additive model, implemented in the `mgcv` package. 
@@ -74,8 +81,8 @@ First we set up the main functions required for our analysis:
 # Function to prepare data
 prepare_data <- function(input_data, # Input data with date, cases and av_temp columns
                          pop, # Assumed population size
-                         rep_prop # Assume proportion of infections reported as cases
-                         ){
+                         rep_prop, # Assume proportion of infections reported as cases
+                         number_mc_samples = 100){
   
   # Check that reporting assumption does not result in more infections than pop size
   if(sum(input_data$cases, na.rm = T)/rep_prop > pop){
@@ -84,19 +91,34 @@ prepare_data <- function(input_data, # Input data with date, cases and av_temp c
 
   # Add relative R0 column
   input_data$rR0 <- temperature_r0(input_data$av_temp, "AeaeDENV")
+  daily_dt <- weekly_to_daily_temps_function(input_data)
+  #Times we can estimate SI
+  fitting_dt <- fitting_data_table_function(daily_dt)
+  # From Siraj et al 2017
+  siraj_2017_params <- set_siraj_2017_params()
+  daily_gi_samples_dt <- run_time_varying_monte_carlo(number_mc_samples = number_mc_samples,
+           all_data = daily_dt,
+           fitting_data = fitting_dt,
+           siraj_2017_params)
+  # Calculate SI for given date (relies on daily temperature data), SI then binned to weekly
+  weekly_gi_samples_dt <- weekly_si_from_daily_si_function(daily_gi_samples_dt)
+  fitting_dt <- subset(fitting_dt, EVALUATE == TRUE)
+  fitting_dt <- data.table(fitting_dt)
+# fitting_dt[which(cases == 0), cases:= 0]
+  si_cases_dt <- weight_cases(weekly_gi_samples_dt, fitting_dt)
 
   # Add columns tracking recent lagged cases (for serial interval)
   # and cumulative cases (for estimating immunity)
-  model_data <- input_data |> 
+  model_data <- si_cases_dt |> 
     dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
     dplyr::arrange(date) |> 
     dplyr::mutate(log_rR0 = log(rR0 + 0.0001),
            cumulative_cases = lag(cumsum(cases),1), 
            pop_susceptible = 1 - pmax(0, (cumulative_cases/pop)/rep_prop),
-           weighted_lagged_cases = weight_cases(cases),
-           log_weighted_lagged_cases = log(weighted_lagged_cases + 0.0001),
-           log_pop_susceptible = log(pop_susceptible + 0.0001))
-  
+           weighted_lagged_cases = weighted_lagged_cases,
+         log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001),
+         log_pop_susceptible = log(pop_susceptible + 0.001))
+
   # Set cumulative cases to zero initially
   model_data$cumulative_cases[1] <- 0
   model_data$pop_susceptible[1] <- 1
@@ -111,14 +133,16 @@ prepare_data <- function(input_data, # Input data with date, cases and av_temp c
 
 }
 
+
+#Not using at the minute
 # Function to weight past cases by dengue serial interval
 # From Siraj et al 2017
 # Note: have edited to only include 4 weeks of lag (i.e. no lag 5)
 
-weight_cases <- function(x){
-  weighted_cases <- lag(x,2)*0.2 + lag(x,3)*0.425 + lag(x,4)*0.375 
-  return(weighted_cases)
-}
+# weight_cases <- function(x){
+#   weighted_cases <- lag(x,2)*0.2 + lag(x,3)*0.425 + lag(x,4)*0.375 
+#   return(weighted_cases)
+# }
 
 # Function to iterate over horizon window
 predict_cases <- function(train_data,
@@ -245,11 +269,12 @@ generate_prediction <- function(model_data,
   if(nrow(train_data)<10){
     warning("Fewer than 10 weeks of training data, results may be unstable")
   }
-  
-  # Run GAM model, or use pre-existing input model
+  # print(train_data)
+  # # Run GAM model, or use pre-existing input model
   # NOTE: Ideally edit to brms so can input priors
   if(is.null(model_in)){
     # Check whether susceptible term is fixed (i.e. SIR-like) or flexible
+    # Check: Covariate of log_weighted_lagged_cases is fixed or not
     if(fix_all_covariates==TRUE){
       gam_mod <- mgcv::gam(
                   formula = cases ~ offset(log_rR0 + 
@@ -259,9 +284,10 @@ generate_prediction <- function(model_data,
                   data = train_data)
     }else{
       gam_mod <- mgcv::gam(
-                  formula = cases ~ offset(log_rR0 + 
+                  formula = cases ~ offset( 
                                     log_pop_susceptible) +
-                                    log_weighted_lagged_cases,
+                                    log_rR0 +
+                                    log_weighted_lagged_cases, #Should be covariate for log_rR0
                   family = nb(link = "log"),
                   data = train_data)
     }
@@ -375,6 +401,7 @@ find_closest_days <- function(vec1,vec2){
   })
 }
 
+
 ```
 
 ## Fiji 2014 dengue forecast
@@ -384,43 +411,55 @@ Now we format the Fiji 2014 data for forecasting and set our forecast horizon (h
 ```{r}
 population_central_division_fiji <- 342000
 proportion_reported <- 0.1
-
 # Prepare data for analysis
+
 prepare_data_out <- prepare_data(input_data,
                                  pop = population_central_division_fiji, # Assumed population for Central Division
                                  rep_prop = proportion_reported # Assumed proportion of infections reported
                                  )
-
+print(head(prepare_data_out))
 # Define data for the model
 model_data <- prepare_data_out$model_data
+subsetted_input_data <- subset(input_data, date >= min(model_data$date) & date <= max(model_data$date))
 
 # Define potential prediction date range
 prediction_dates <- prepare_data_out$prediction_dates
+prediction_dates
+prediction_dates <- prediction_dates[which(prediction_dates >= min(subsetted_input_data$date) & prediction_dates <= max(subsetted_input_data$date))]
+prediction_dates
 
 # Specify range of potential forecast start dates
 forecast_horizon <- 10
+prediction_dates< - prediction_dates[forecast_horizon:(length(prediction_dates))]
+prediction_dates <- prediction_dates[10:length(prediction_dates)]
 prediction_vals <- define_prediction_starts(prediction_dates, # Possible forecast end dates
                                           horizon = forecast_horizon, # Forecast horizon
                                           n_start = 9 # Number of forecast dates to explore
                                           ) 
+prediction_vals                                          
+# prediction_vals <- prediction_vals[forecast_horizon:length(prediction_vals)]
 
+# prediction_dates< - prediction_dates[forecast_horizon:length(prediction_vals)]
 ```
 
 With the model and data in place, we generate N-week ahead forecasts for a given prediction date. We can also look at `generate_output$model_out` to understand what the model is estimating (i.e. intercept term, which reflects R0, and dependence on susceptibility etc).
 ```{r, message=FALSE, warning=FALSE}
 # Set seed for reproducibility
 set.seed(123)  
-
+print(head(model_data))
+# ii
+# prediction_dates
+# prediction_start
+# model_data
 # Store plots
 plot_list <- list()
-
-for(ii in 1:length(prediction_vals)){
+for(ii in 1:length(prediction_dates)){
 
   if(ii>length(prediction_dates)){
     stop("Need to choose index that is valid for prediction_dates vector")
   }
-  
-  prediction_start <- prediction_vals[ii]
+  prediction_start <- prediction_dates[ii]
+  print(prediction_start)
   
   generate_output <- generate_prediction(model_data, # Model formatted data
                                   input_data = input_data, # Original data

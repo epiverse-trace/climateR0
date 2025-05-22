@@ -15,10 +15,10 @@ Suggests:
     ggplot2,
     gratia,
     here,
-    knitr,
     lubridate,
     mgcv,
-    rmarkdown,
+    MASS,
+    patchwork,
     scales,
     spelling,
     testthat (>= 3.0.0)
@@ -35,8 +35,10 @@ Imports:
     abind,
     cinterpolate,
     dplyr,
+    knitr,
     magrittr,
     rlang,
+    rmarkdown,
     stats,
     tibble,
     tidyr

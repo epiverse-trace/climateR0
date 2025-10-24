@@ -23,10 +23,7 @@ knitr::opts_chunk$set(
 
 ```{r setup, include = FALSE}
 library(climateR0)
-library(mgcv)
-library(dplyr)
 library(ggplot2)
-library(MASS)
 library(patchwork)
 ```
 
@@ -41,8 +38,7 @@ First, let's load and examine the data:
 data(fiji_2014)
 
 # Plot the case data
-input_cases <- fiji_2014 |> 
-  ggplot2::ggplot() +
+input_cases <- ggplot2::ggplot(fiji_2014) +
   ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
   ggplot2::labs(x = "Date", y = "Cases") +
@@ -57,13 +53,13 @@ We need to define some key parameters for our analysis:
 
 ```{r}
 # Population and reporting parameters
-population_central_division_fiji <- 342000
+pop_central_division_fiji <- 342000
 proportion_reported <- 0.1
 
 # Prepare data for analysis
 prepare_data_out <- prepare_data(
   input_data = fiji_2014,
-  pop = population_central_division_fiji,
+  pop = pop_central_division_fiji,
   rep_prop = proportion_reported
 )
 
@@ -101,45 +97,45 @@ set.seed(123)
 plot_list <- list()
 
 # Generate forecasts for each start date
-for(ii in 1:length(prediction_vals)) {
+for (ii in seq_along(prediction_vals)) {
   prediction_start <- prediction_vals[ii]
-  
+
   # Generate prediction
   generate_output <- generate_prediction(
     model_data = model_data,
     input_data = fiji_2014,
     prediction_start = prediction_start,
     horizon = forecast_horizon,
-    pop = population_central_division_fiji,
+    pop = pop_central_division_fiji,
     rep_prop = proportion_reported,
     n_sim = 50,
     fix_all_covariates = FALSE
   )
-  
+
   # Extract predictions
   prediction_out <- generate_output$prediction_out
-  cases_data <- prediction_out[,"cases_sim",]
-  
+  cases_data <- prediction_out[, "cases_sim", ]
+
   # Calculate summary statistics
   summary_stats <- data.frame(
-    date = as.Date(prediction_out[,"date",1], origin = "1970-01-01"),
+    date = as.Date(prediction_out[, "date", 1], origin = "1970-01-01"),
     median = apply(cases_data, 1, median),
     lower50 = apply(cases_data, 1, quantile, probs = 0.25, na.rm = TRUE),
     upper50 = apply(cases_data, 1, quantile, probs = 0.75, na.rm = TRUE),
     lower90 = apply(cases_data, 1, quantile, probs = 0.05, na.rm = TRUE),
     upper90 = apply(cases_data, 1, quantile, probs = 0.95, na.rm = TRUE)
   )
-  
+
   # Calculate R0 from the GAM model
   r0_out <- exp(generate_output$model_out$coefficients[1])
   r0_estimate <- data.frame(
     date = model_data$date,
     r0_est = model_data$rR0 * r0_out
   )
-  
+
   # Define training window
-  train_dataset <- model_data[model_data$date <= prediction_start,]
-  
+  train_dataset <- model_data[model_data$date <= prediction_start, ]
+
   # Create plot
   p1 <- ggplot(summary_stats, aes(x = date)) +
     geom_ribbon(aes(ymin = lower90, ymax = upper90, fill = "90% PI")) +
@@ -150,13 +146,13 @@ for(ii in 1:length(prediction_vals)) {
     geom_point(data = train_dataset,
                aes(x = date, y = cases, color = "Data (real-time)")) +
     scale_color_manual(values = c(
-      "Forecast" = rgb(0,0.5,0.8),
+      Forecast = rgb(0, 0.5, 0.8),
       "Data (all)" = "grey",
       "Data (real-time)" = "black"
     )) +
     scale_fill_manual(values = c(
-      "90% PI" = rgb(0.8,0.95,1),
-      "50% PI" = rgb(0.6,0.85,1)
+      "90% PI" = rgb(0.8, 0.95, 1),
+      "50% PI" = rgb(0.6, 0.85, 1)
     )) +
     coord_cartesian(ylim = c(0, 2e3)) +
     guides(fill = "none", color = "none") +
@@ -167,7 +163,7 @@ for(ii in 1:length(prediction_vals)) {
     ) +
     theme_minimal() +
     theme(legend.position = c(0.8, 0.8))
-  
+
   plot_list[[ii]] <- p1
 }
 
@@ -207,4 +203,4 @@ summary(last_model)
 ## References
 
 - Siraj et al. (2017) for dengue serial interval estimates
-- Temperature-dependent R0 calculations from the climateR0 package 
+- Temperature-dependent R0 calculations from the climateR0 package

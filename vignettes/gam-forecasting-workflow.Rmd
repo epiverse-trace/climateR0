@@ -182,7 +182,7 @@ Here we plot all our 2-week ahead forecasts (with different colours depending on
   ggplot2::geom_ribbon(ggplot2::aes(x = date, ymin = q_0.025, ymax = q_0.975, fill = as.factor(prediction_start), group = prediction_start), alpha = 0.2) +
   ggplot2::geom_line(aes(x = date, y = cases)) +
   ggplot2::scale_x_date(date_breaks  = "2 weeks", labels = scales::label_date_short()) +
-  ggplot2::coord_cartesian(ylim = c(0,2000)) +
+  ggplot2::coord_cartesian(ylim = c(0, 2000)) +
   ggplot2::labs(x = "Confirmed cases", y = "Date") +
   ggplot2::theme_bw() +
   ggplot2::theme(legend.position = "none")

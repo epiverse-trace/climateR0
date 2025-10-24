@@ -24,7 +24,7 @@ prepare_data <- function(input_data, pop, rep_prop) {
     dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |> 
     dplyr::arrange(date) |> 
     dplyr::mutate(log_rR0 = log(rR0 + 0.0001),
-           cumulative_cases = lag(cumsum(cases), 1), 
+           cumulative_cases = dplyr::lag(cumsum(cases), 1), 
            pop_susceptible = 1 - pmax(0, (cumulative_cases/pop)/rep_prop),
            weighted_lagged_cases = weight_cases(cases),
            log_weighted_lagged_cases = log(weighted_lagged_cases + 0.0001),
@@ -50,7 +50,7 @@ prepare_data <- function(input_data, pop, rep_prop) {
 #' @return Vector of weighted case counts based on serial interval
 #' @export
 weight_cases <- function(x) {
-  weighted_cases <- lag(x, 2)*0.2 + lag(x, 3)*0.425 + lag(x, 4)*0.375 
+  weighted_cases <- dplyr::lag(x, 2)*0.2 + dplyr::lag(x, 3)*0.425 + dplyr::lag(x, 4)*0.375 
   return(weighted_cases)
 }
 

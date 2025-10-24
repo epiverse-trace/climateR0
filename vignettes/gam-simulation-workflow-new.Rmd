@@ -25,6 +25,9 @@ knitr::opts_chunk$set(
 library(climateR0)
 library(ggplot2)
 library(patchwork)
+# nolint start: unused_import_linter.
+library(mgcv) # Needed for nb() family in GAM models
+# nolint end
 ```
 
 This vignette demonstrates how to use the `climateR0` package for GAM-based forecasting of disease cases, incorporating temperature-dependent R0 values. We'll use the Fiji 2013/14 dengue outbreak as a case study.

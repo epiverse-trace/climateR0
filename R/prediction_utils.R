@@ -62,7 +62,7 @@ predict_cases <- function(train_data,
   horizon_end <- nrow(train_test_data[,,1])
   
   # Set up progress bar
-  pb <- txtProgressBar(horizon_start, horizon_end, style = 3, title = "Simulating: ")
+  pb <- utils::txtProgressBar(horizon_start, horizon_end, style = 3, title = "Simulating: ")
 
   for (kk in horizon_start:horizon_end) {
     
@@ -135,7 +135,7 @@ predict_cases <- function(train_data,
     }
         
     # Display progress
-    setTxtProgressBar(pb, kk)
+    utils::setTxtProgressBar(pb, kk)
   }
   
   close(pb) # Close bar

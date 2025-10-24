@@ -42,14 +42,14 @@ generate_prediction <- function(model_data,
         formula = cases ~ offset(log_rR0 + 
                           log_weighted_lagged_cases +
                           log_pop_susceptible),
-        family = nb(link = "log"),
+        family = mgcv::nb(link = "log"),
         data = train_data)
     } else {
       gam_mod <- mgcv::gam(
         formula = cases ~ offset(log_rR0 + 
                           log_pop_susceptible) +
                           log_weighted_lagged_cases,
-        family = nb(link = "log"),
+        family = mgcv::nb(link = "log"),
         data = train_data)
     }
   } else {

@@ -14,3 +14,5 @@
 ^pkgdown$
 ^tools$
 ^data-raw$
+^vignettes/gam-forecasting-workflow\.Rmd$
+^vignettes/gam-simulation-workflow\.Rmd$

@@ -40,7 +40,8 @@ Imports:
     rmarkdown,
     stats,
     tibble,
-    tidyr
+    tidyr,
+    utils
 Depends: 
     R (>= 4.1.0)
 LazyData: true

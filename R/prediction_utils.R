@@ -44,6 +44,8 @@ define_prediction_starts <- function(prediction_dates, horizon, n_start) {
 
 #' Predict cases using a fitted GAM model
 #'
+#' @importFrom utils tail
+#' @importFrom stats vcov coef model.matrix predict
 #' @param train_data Training data
 #' @param train_test_data Combined training and test data
 #' @param prediction_bootstrap Array for storing predictions

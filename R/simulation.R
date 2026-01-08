@@ -1,5 +1,6 @@
 #' Generate predictions using GAM-based forecasting
 #'
+#' @importFrom utils tail
 #' @param model_data Processed model data
 #' @param input_data Original input data
 #' @param prediction_start Start date for prediction

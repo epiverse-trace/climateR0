@@ -4,7 +4,6 @@
 #' in °C and returns estimated relative R0 values for a specified vector and
 #' pathogen.
 #' @importFrom rlang .data
-#' @importFrom magrittr %>%
 #' @importFrom utils read.csv
 #' @param data A numeric vector of mean temperature values in °C
 #' @param vector_pathogen Character vector specifying the vector and pathogen
@@ -57,13 +56,13 @@ temperature_r0 <- function(data, vector_pathogen) {
 
   # Wrangle posteriors
 
-  tr0 <- r0_posteriors %>%
-    tibble::rownames_to_column(var = "temp") %>%
-    tidyr::pivot_longer(cols = -.data$temp, names_to = "iteration", names_prefix = "X0.", values_to = "r0") %>%
-    dplyr::mutate(iteration = gsub("[^0-9.-]", "", .data$iteration), iteration = as.integer(.data$iteration)) %>%
-    dplyr::mutate(temp = as.numeric(.data$temp)) %>%
-    dplyr::group_by(.data$temp) %>%
-    dplyr::summarise(median_r0 = stats::median(.data$r0)) %>%
+  tr0 <- r0_posteriors |>
+    tibble::rownames_to_column(var = "temp") |>
+    tidyr::pivot_longer(cols = -.data$temp, names_to = "iteration", names_prefix = "X0.", values_to = "r0") |>
+    dplyr::mutate(iteration = gsub("[^0-9.-]", "", .data$iteration), iteration = as.integer(.data$iteration)) |>
+    dplyr::mutate(temp = as.numeric(.data$temp)) |>
+    dplyr::group_by(.data$temp) |>
+    dplyr::summarise(median_r0 = stats::median(.data$r0)) |>
     # rescale to get relative r0 between 0 and 1
     dplyr::mutate(median_r0 = .data$median_r0 / max(.data$median_r0))
 

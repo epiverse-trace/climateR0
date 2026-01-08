@@ -11,15 +11,17 @@ An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) w
 tahiti_2013
 }
 \description{
-Dataset includes weekly laboratory confirmed Zika cases from Tahiti in French Polynesia, during an outbreak in 2013 and 2014
-as well as monthly average temperature data and rainfall for Tahiti during this period
+Dataset includes weekly laboratory confirmed Zika cases from Tahiti in
+French Polynesia, during an outbreak in 2013 and 2014 as well as monthly
+average temperature data and rainfall for Tahiti during this period
 }
 \details{
 #' A data frame with 25 rows and 6 columns:
 \describe{
 \item{date}{Date of epidemiological week}
 \item{cases}{Number of laboratory confirmed cases in Tahiti}
-\item{reporting_sites}{Number of sentinel sites in Tahiti reporting that month}
+\item{reporting_sites}{Number of sentinel sites in Tahiti reporting that
+month}
 \item{total_sites}{Total sentinel sites Tahiti}
 \item{av_temp}{Average monthly temperature for Tahiti, in °C}
 \item{av_temp}{Average monthly rainfall for Tahiti, in mm}

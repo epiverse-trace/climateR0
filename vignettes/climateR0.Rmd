@@ -33,7 +33,7 @@ library(cowplot)
 As a first case study, we'll use data from a 2013/4 DENV-3 outbreak in Fiji. Here we show laboratory confirmed cases over time in Central Division.
 
 ```{r}
-fiji_cases <- fiji_2014 |> 
+fiji_cases <- fiji_2014 |>
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
@@ -53,7 +53,7 @@ fiji_2014$rR0 <- temperature_r0(fiji_2014$av_temp, "AeaeDENV")
 Now we can plot relative temperature-dependent R~0~ values alongside case data.
 
 ```{r}
-fiji_rR0 <- fiji_2014 |> 
+fiji_rR0 <- fiji_2014 |>
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
@@ -74,7 +74,7 @@ As discussed in [Kucharski et al (2018)](https://elifesciences.org/articles/3484
 As a second study, we'll use data from a 2013/4 Zika outbreak in Tahiti, French Polynesia. Here we show laboratory confirmed cases over time from sentinel reporting sites in Tahiti.
 
 ```{r}
-tahiti_cases <- tahiti_2013 |> 
+tahiti_cases <- tahiti_2013 |>
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
@@ -94,7 +94,7 @@ tahiti_2013$rR0 <- temperature_r0(tahiti_2013$av_temp, "AeaeZIKV")
 Now we can plot relative temperature-dependent R~0~ values alongside case data.
 
 ```{r}
-tahiti_rR0 <- tahiti_2013 |> 
+tahiti_rR0 <- tahiti_2013 |>
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
   ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +

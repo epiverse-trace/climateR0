@@ -15,7 +15,8 @@ prepare_data(input_data, pop, rep_prop)
 }
 \value{
 A list containing:
-\item{model_data}{Processed data frame with additional columns for modeling}
+\item{model_data}{Processed data frame with additional columns for
+modeling}
 \item{prediction_dates}{Vector of dates for prediction}
 }
 \description{

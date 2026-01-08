@@ -1,5 +1,6 @@
 #' Prepare data for GAM-based forecasting
 #'
+#' @importFrom rlang .data
 #' @param input_data A data frame containing date, cases and av_temp columns
 #' @param pop Assumed population size
 #' @param rep_prop Assumed proportion of infections reported as cases
@@ -11,6 +12,7 @@
 #'
 #' @export
 prepare_data <- function(input_data, pop, rep_prop) {
+
   # Check that reporting assumption does not result in more infections than
   # pop size
   if (sum(input_data$cases, na.rm = TRUE) / rep_prop > pop) {
@@ -28,12 +30,12 @@ prepare_data <- function(input_data, pop, rep_prop) {
   model_data <- input_data |>
     dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |>
     dplyr::arrange(date) |>
-    dplyr::mutate(log_rR0 = log(rR0 + 0.0001),
-           cumulative_cases = dplyr::lag(cumsum(cases), 1),
+    dplyr::mutate(log_rR0 = log(.data$rR0 + 0.0001),
+           cumulative_cases = dplyr::lag(cumsum(.data$cases), 1),
            pop_susceptible = 1 - pmax(0, (cumulative_cases / pop) / rep_prop),
            weighted_lagged_cases = weight_cases(cases),
-           log_weighted_lagged_cases = log(weighted_lagged_cases + 0.0001),
-           log_pop_susceptible = log(pop_susceptible + 0.0001))
+           log_weighted_lagged_cases = log(.data$weighted_lagged_cases + 0.0001),
+           log_pop_susceptible = log(.data$pop_susceptible + 0.0001))
 
   # Set cumulative cases to zero initially
   model_data$cumulative_cases[1] <- 0

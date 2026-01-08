@@ -1,0 +1,35 @@
+# climateR0
+
+`{climateR0}` is an `R` package to estimate relative R0 from temperature
+data for climate sensitive diseases.
+
+`{climateR0}` is developed at the [Centre for the Mathematical Modelling
+of Infectious
+Diseases](https://www.lshtm.ac.uk/research/centres/centre-mathematical-modelling-infectious-diseases)
+at the [London School of Hygiene and Tropical
+Medicine](https://www.lshtm.ac.uk/) as part of
+[Epiverse-TRACE](https://data.org/initiatives/epiverse/).
+
+## Installation
+
+You can install the development version of packagetemplate from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("epiverse-trace/climateR0")
+```
+
+## Example
+
+### Contributions
+
+Contributions are welcome via [pull
+requests](https://github.com/epiverse-trace/climateR0/pulls).
+
+### Code of Conduct
+
+Please note that the `{climateR0}` project is released with a
+[Contributor Code of
+Conduct](https://github.com/epiverse-trace/.github/blob/main/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.

@@ -1,0 +1,35 @@
+# Design Principles for {climateR0}
+
+This vignette outlines the design decisions that have been taken during
+the development of the `{climateR0}` R package, and provides some of the
+reasoning, and possible pros and cons of each decision.
+
+This document is primarily intended to be read by those interested in
+understanding the code within the package and for potential package
+contributors.
+
+## Scope
+
+The {climateR0} package allows for the estimation of relative R0 from
+mean temperature data for climate sensitive pathogen/vector pairs. This
+package does not directly estimate relative R0 from temperature data but
+instead interpolates from the constant temperature - R0 relationships in
+[Mordecai et al
+2019](https://onlinelibrary.wiley.com/doi/10.1111/ele.13335).
+
+This relative R0 can then be used to generate simple short-term case
+forecasts.
+
+## Input and Output
+
+The input and output of the
+[`temperature_r0()`](https://epiverse-trace.github.io/climateR0/reference/temperature_r0.md)
+function are both numeric vectors. The function takes a numeric vector
+of mean temperature in °C and outputs a numeric vector of relative R0
+(scaled from 0 to 1) with equal length to the input vector.
+
+## Design decisions
+
+## Dependencies
+
+- [{cinterpolate}](https://cran.r-project.org/web/packages/cinterpolate/index.html)

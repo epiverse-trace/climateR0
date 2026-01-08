@@ -25,6 +25,9 @@ prepare_data <- function(input_data, pop, rep_prop) {
   # Add relative R0 column
   input_data$rR0 <- temperature_r0(input_data$av_temp, "AeaeDENV")
 
+  # no visible binding for global variable
+  cases <- cumulative_cases <- NULL
+
   # Add columns tracking recent lagged cases (for serial interval)
   # and cumulative cases (for estimating immunity)
   model_data <- input_data |>

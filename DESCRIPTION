@@ -13,10 +13,14 @@ Suggests:
     bookdown,
     cowplot,
     ggplot2,
+    gratia,
     here,
     knitr,
     lubridate,
+    MASS,
+    patchwork,
     rmarkdown,
+    scales,
     spelling,
     testthat (>= 3.0.0)
 VignetteBuilder: 
@@ -27,15 +31,17 @@ Config/testthat/parallel: true
 Encoding: UTF-8
 Language: en-GB
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Imports: 
+    abind,
     cinterpolate,
     dplyr,
-    magrittr,
+    mgcv,
     rlang,
     stats,
     tibble,
-    tidyr
+    tidyr,
+    utils
 Depends: 
     R (>= 4.1.0)
 LazyData: true

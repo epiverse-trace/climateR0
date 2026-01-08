@@ -5,21 +5,25 @@
 \alias{fiji_2014}
 \title{Fiji 2014.}
 \format{
-An object of class \code{data.frame} with 44 rows and 3 columns.
+An object of class \code{data.frame} with 44 rows and 4 columns.
 }
 \usage{
 fiji_2014
 }
 \description{
-Dataset includes weekly laboratory confirmed DENV-3 cases from Central Division in Fiji, during an outbreak in 2013 and 2014
-as well as monthly average temperature data for Fiji during this period
+Dataset includes weekly laboratory confirmed DENV-3 cases from Central
+Division in Fiji, during an outbreak in 2013 and 2014 as well as monthly
+average temperature data for Fiji and yearly population size for Central
+Division during this period
 }
 \details{
-#' A data frame with 44 rows and 3 columns:
+A data frame with 44 rows and 3 columns:
 \describe{
 \item{date}{Date of epidemiological week}
-\item{cases}{Number of laboratory confirmed cases in Central Division, Fiji}
+\item{cases}{Number of laboratory confirmed cases in Central Division,
+Fiji}
 \item{av_temp}{Average monthly temperature for Fiji, in °C}
+\item{pop}{Yearly population size for Central Division}
 ...
 }
 #' @source \url{https://github.com/adamkucharski/fiji-denv3-2014}

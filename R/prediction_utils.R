@@ -19,7 +19,8 @@ define_prediction_starts <- function(prediction_dates, horizon, n_start) {
   pick_indices <- function(vec, x) {
     if (x > length(vec)) {
       stop(
-        "Number of chosen start dates can't be larger than possible set of options.",
+        "Number of chosen start dates can't be larger than possible ",
+        "set of options.",
         call. = FALSE
       )
     }
@@ -34,7 +35,7 @@ define_prediction_starts <- function(prediction_dates, horizon, n_start) {
   prediction_vals <- pick_indices(prediction_range, n_start)
 
   # Check prediction values value
-  if (sum(is.na(prediction_vals)) > 0) {
+  if (sum(is.na(prediction_vals)) > 0) { # nolint: boolean_arithmetic_linter
     stop("Need smaller horizon or stop predictions earlier", call. = FALSE)
   }
 
@@ -78,11 +79,13 @@ predict_cases <- function(train_data,
     for (jj in 1:n_sim) {
 
       # Generate draw from bootstrap dataset
-      index_sample <- sample(1:n_sim, 1)
-      train_test_data_kk <- data.frame(prediction_bootstrap[1:kk, , index_sample])
+      index_sample <- sample(1:n_sim, 1) # nolint: sample_int_linter
+      train_test_data_kk <- data.frame(
+        prediction_bootstrap[1:kk, , index_sample]
+      )
 
       # Predicted means based on original model
-      original_means <- predict(
+      original_means <- predict( # nolint
         gam_mod,
         newdata = train_test_data_kk,
         type = "link"
@@ -100,8 +103,9 @@ predict_cases <- function(train_data,
       # Compute the linear predictor with the new coefficients
       design_matrix <- model.matrix(gam_mod, newdata = train_test_data_kk)
 
-      # Specify prediction depending on whether susceptible term has a coefficient
-      if (fix_all_covariates == TRUE) {
+      # Specify prediction depending on whether susceptible term has a
+      # coefficient
+      if (fix_all_covariates == TRUE) { # nolint
         linear_predictor <- design_matrix %*% coef_sim +
                           train_test_data_kk$log_rR0 +
                           train_test_data_kk$log_weighted_lagged_cases +
@@ -117,7 +121,7 @@ predict_cases <- function(train_data,
 
       # Generate simulated counts from the expectation
       # Note: we use expectation because interested in underlying dynamics
-      new_simulation <- predicted_means #exp(original_means)
+      new_simulation <- predicted_means #exp(original_means) # nolint
 
       # Record full range of simulated cases
       if (kk == horizon_start) {
@@ -139,13 +143,15 @@ predict_cases <- function(train_data,
       # Add padding to calculate
       weighted_lagged_cases <- tail(
         weight_cases(c(train_test_new$cases[1:kk], 0)), 1
-      ) 
+      )
       log_weighted_lagged_cases <- log(weighted_lagged_cases + 0.0001)
       log_pop_susceptible <- log(pop_susceptible + 0.0001)
 
       if (kk < horizon_end) {
-        prediction_bootstrap[kk + 1, "log_weighted_lagged_cases", jj] <- tail(log_weighted_lagged_cases, 1)
-        prediction_bootstrap[kk + 1, "log_pop_susceptible", jj] <- tail(log_pop_susceptible, 1)
+        prediction_bootstrap[kk + 1, "log_weighted_lagged_cases", jj] <-
+          tail(log_weighted_lagged_cases, 1)
+        prediction_bootstrap[kk + 1, "log_pop_susceptible", jj] <-
+          tail(log_pop_susceptible, 1)
       }
     }
 

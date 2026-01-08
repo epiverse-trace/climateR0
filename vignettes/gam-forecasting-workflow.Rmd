@@ -23,7 +23,6 @@ knitr::opts_chunk$set(
 
 ```{r setup, include = FALSE}
 library(climateR0)
-library(here)
 library(mgcv)
 library(dplyr)
 library(gratia)
@@ -75,7 +74,8 @@ model_data <- fiji_2014 |>
   dplyr::mutate(date_numeric = as.numeric(date - min(date) + 1)) |>
   dplyr::arrange(date) |>
   dplyr::mutate(
-    cumulative_cases = cumsum(cases), pop_susceptible = 1 - (cumulative_cases / pop),
+    cumulative_cases = cumsum(cases),
+    pop_susceptible = 1 - (cumulative_cases / pop),
     weighted_lagged_cases = weight_cases(cases),
     log_weighted_lagged_cases = log(weighted_lagged_cases + 0.001),
     log_pop_susceptible = log(pop_susceptible + 0.001)
@@ -117,7 +117,8 @@ train_data <- model_data |>
   family = "nb",
   data = train_data)
 
- # Set up testing rows
+# nolint start: line_length_linter 
+# Set up testing rows
 prediction_rows <- data.frame(
   date = as.Date(prediction_start, origin = "1970-01-01") + seq(7, 7 * horizon, by = 7),
   date_numeric = max(train_data$date_numeric) + seq(7, 7 * horizon, by = 7),
@@ -126,10 +127,11 @@ prediction_rows <- data.frame(
   log_weighted_lagged_cases = rep(tail(train_data$log_weighted_lagged_cases, 1), horizon),
   cases = rep(NA, horizon)
 )
+# nolint end
 
 train_test_data <-
   rbind(
-    train_data |> dplyr::select(
+    train_data |> dplyr::select( # nolint: nested_pipe_linter
       date, date_numeric, rR0, log_pop_susceptible,
       log_weighted_lagged_cases, cases
     ),
@@ -137,7 +139,7 @@ train_test_data <-
   )
 
 # Generate samples from posterior estimates
-samples <- gratia::posterior_samples(
+samples <- posterior_samples(
   model = gam_mod,
   data = train_test_data,
   n = 1000,
@@ -161,7 +163,7 @@ prediction_out <- samples |>
   dplyr::select(-.row) |>
   dplyr::mutate(prediction_start = prediction_start)
 
-prediction_out <- cbind(train_test_data |> select(date), prediction_out) |>
+prediction_out <- cbind(train_test_data |> select(date), prediction_out) |> # nolint: pipe_continuation_linter
   dplyr::mutate(type = case_when(date > prediction_start ~ "forecast",
                    T ~ "fit"))
 
@@ -169,7 +171,7 @@ prediction_out <- cbind(train_test_data |> select(date), prediction_out) |>
 cols <- c(fit = "#8e0152", forecast = "#276419")
 
 current_forecast <- prediction_out |>
-  cbind(train_test_data |> select(cases)) |>
+  cbind(train_test_data |> select(cases)) |> # nolint: pipe_continuation_linter
   ggplot2::ggplot() +
   ggplot2::geom_line(ggplot2::aes(x = date, y = median, col = type)) +
   ggplot2::geom_ribbon(
@@ -188,13 +190,16 @@ current_forecast <- prediction_out |>
   ggplot2::labs(x = "Confirmed cases cases", y = "Date", fill = "", col = "") +
   ggplot2::theme_bw()
 
-weekly_forecasts[[match(prediction_start, prediction_dates)]] <- current_forecast
+weekly_forecasts[[match(prediction_start, prediction_dates)]] <- current_forecast # nolint: line_length_linter
 all_forecasts <- rbind(all_forecasts, prediction_out)
 }
 
 formatted_forecasts <- merge(
-  all_forecasts |> filter(type == "forecast"), model_data |> dplyr::select(cases, date), by = "date", all = TRUE
-  ) |>
+  all_forecasts |> filter(type == "forecast"),
+  model_data |> dplyr::select(cases, date),
+  by = "date",
+  all = TRUE
+) |>
   dplyr::mutate(
     prediction_start = as.Date(prediction_start, origin = "1970-01-01")
   )

@@ -7,6 +7,9 @@
 \format{
 An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 25 rows and 6 columns.
 }
+\source{
+\url{https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726}
+}
 \usage{
 tahiti_2013
 }
@@ -16,7 +19,7 @@ French Polynesia, during an outbreak in 2013 and 2014 as well as monthly
 average temperature data and rainfall for Tahiti during this period
 }
 \details{
-#' A data frame with 25 rows and 6 columns:
+A data frame with 25 rows and 6 columns:
 \describe{
 \item{date}{Date of epidemiological week}
 \item{cases}{Number of laboratory confirmed cases in Tahiti}
@@ -27,6 +30,5 @@ month}
 \item{av_temp}{Average monthly rainfall for Tahiti, in mm}
 ...
 }
-#' @source \url{https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726}
 }
 \keyword{datasets}

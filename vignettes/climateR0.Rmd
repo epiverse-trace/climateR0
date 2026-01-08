@@ -34,11 +34,11 @@ As a first case study, we'll use data from a 2013/4 DENV-3 outbreak in Fiji. Her
 
 ```{r}
 fiji_cases <- fiji_2014 |>
-  ggplot2::ggplot() +
-  ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
-  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
-  ggplot2::labs(x = "Date", y = "Reported dengue cases") +
-  ggplot2::theme_classic()
+  ggplot() +
+  geom_line(aes(x = date, y = cases), col = "#016c59") +
+  scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  labs(x = "Date", y = "Reported dengue cases") +
+  theme_classic()
 
 fiji_cases
 
@@ -54,17 +54,17 @@ Now we can plot relative temperature-dependent R~0~ values alongside case data.
 
 ```{r}
 fiji_rR0 <- fiji_2014 |>
-  ggplot2::ggplot() +
-  ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
-  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
-  ggplot2::labs(x = "Date", y = "Relative R0") +
-  ggplot2::theme_classic()
+  ggplot() +
+  geom_line(aes(x = date, y = rR0), col = "#54278f") +
+  scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  labs(x = "Date", y = "Relative R0") +
+  theme_classic()
 
 fiji_rR0
 ```
 
 ```{r}
-cowplot::plot_grid(fiji_cases, fiji_rR0, nrow = 2)
+plot_grid(fiji_cases, fiji_rR0, nrow = 2)
 ```
 
 As discussed in [Kucharski et al (2018)](https://elifesciences.org/articles/34848#s2), comparing the case time series with temperature-dependent R~0~ indicates that a fall in transmission due to seasonal temperature variation cannot fully explain the fall in cases from March 2014. In this paper, Kucharski and colleagues found that a model including the build-up of herd immunity and a decrease in transmission resulting from a vector control campaign in March 2024 better captured the observed pattern of cases.
@@ -75,11 +75,11 @@ As a second study, we'll use data from a 2013/4 Zika outbreak in Tahiti, French 
 
 ```{r}
 tahiti_cases <- tahiti_2013 |>
-  ggplot2::ggplot() +
-  ggplot2::geom_line(ggplot2::aes(x = date, y = cases), col = "#016c59") +
-  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
-  ggplot2::labs(x = "Date", y = "Reported Zika cases") +
-  ggplot2::theme_classic()
+  ggplot() +
+  geom_line(aes(x = date, y = cases), col = "#016c59") +
+  scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  labs(x = "Date", y = "Reported Zika cases") +
+  theme_classic()
 
 tahiti_cases
 
@@ -95,11 +95,11 @@ Now we can plot relative temperature-dependent R~0~ values alongside case data.
 
 ```{r}
 tahiti_rR0 <- tahiti_2013 |>
-  ggplot2::ggplot() +
-  ggplot2::geom_line(ggplot2::aes(x = date, y = rR0), col = "#54278f") +
-  ggplot2::scale_x_date(breaks = "month", date_labels = "%b-%y") +
-  ggplot2::labs(x = "Date", y = "Relative R0") +
-  ggplot2::theme_classic()
+  ggplot() +
+  geom_line(aes(x = date, y = rR0), col = "#54278f") +
+  scale_x_date(breaks = "month", date_labels = "%b-%y") +
+  labs(x = "Date", y = "Relative R0") +
+  theme_classic()
 
 tahiti_rR0
 ```

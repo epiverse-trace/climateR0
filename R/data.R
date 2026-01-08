@@ -24,7 +24,7 @@
 #' French Polynesia, during an outbreak in 2013 and 2014 as well as monthly
 #' average temperature data and rainfall for Tahiti during this period
 #'
-#'#' A data frame with 25 rows and 6 columns:
+#' A data frame with 25 rows and 6 columns:
 #' \describe{
 #'   \item{date}{Date of epidemiological week}
 #'   \item{cases}{Number of laboratory confirmed cases in Tahiti}
@@ -35,5 +35,6 @@
 #'   \item{av_temp}{Average monthly rainfall for Tahiti, in mm}
 #'   ...
 #' }
-#' #' @source <https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726>
+#' @source
+#' <https://journals.plos.org/plosntds/article?id=10.1371/journal.pntd.0004726>
 "tahiti_2013"

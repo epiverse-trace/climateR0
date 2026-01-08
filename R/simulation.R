@@ -42,7 +42,7 @@ generate_prediction <- function(model_data,
   # Run GAM model, or use pre-existing input model
   if (is.null(model_in)) {
     # Check whether susceptible term is fixed (i.e. SIR-like) or flexible
-    if (fix_all_covariates == TRUE) {
+    if (fix_all_covariates == TRUE) { # nolint
       gam_mod <- mgcv::gam(
         formula = cases ~ offset(log_rR0 +
                           log_weighted_lagged_cases +
@@ -61,20 +61,22 @@ generate_prediction <- function(model_data,
     gam_mod <- model_in
   }
 
-  # DEBUG: test_pred <- data.frame(log_rR0 = log(0.5), log_weighted_lagged_cases=log(100), log_pop_susceptible=log(1)); predict(gam_mod,test_pred, type = "response")
+  # DEBUG: test_pred <- data.frame(log_rR0 = log(0.5), log_weighted_lagged_cases=log(100), log_pop_susceptible=log(1)); predict(gam_mod,test_pred, type = "response") # nolint
 
   # Define rR0 for forecast period
-  get_rR0_forecast <- model_data$rR0[model_data$date > as.Date(prediction_start)][1:horizon]
+  get_rR0_forecast <- model_data$rR0[model_data$date > as.Date(prediction_start)][1:horizon] # nolint
 
   # Set up testing rows
   prediction_rows <- data.frame(
-    date = as.Date(prediction_start, origin = "1970-01-01") + 
+    date = as.Date(prediction_start, origin = "1970-01-01") +
       seq(7, 7 * horizon, by = 7),
     date_numeric = max(train_data$date_numeric) + seq(7, 7 * horizon, by = 7),
     rR0 = get_rR0_forecast,
     log_rR0 = log(get_rR0_forecast + 0.0001),
     log_pop_susceptible = rep(tail(train_data$log_pop_susceptible, 1), horizon),
-    log_weighted_lagged_cases = rep(tail(train_data$log_weighted_lagged_cases, 1), horizon),
+    log_weighted_lagged_cases = rep(
+      tail(train_data$log_weighted_lagged_cases, 1), horizon
+    ),
     cases = rep(NA, horizon)
   )
 
@@ -84,13 +86,18 @@ generate_prediction <- function(model_data,
   prediction_rows$log_pop_susceptible <- log(pop_susceptible + 0.0001)
 
   weighted_lagged_cases <- tail(weight_cases(c(train_data$cases, 0)), 1)
-  prediction_rows$log_weighted_lagged_cases <- log(weighted_lagged_cases + 0.0001)
+  prediction_rows$log_weighted_lagged_cases <- log(
+    weighted_lagged_cases + 0.0001
+  )
 
   # Define training and test data
-  train_test_data <-
-    rbind(train_data |> dplyr::select(date, date_numeric, rR0, log_rR0,
-                                     log_pop_susceptible, log_weighted_lagged_cases, cases),
-          prediction_rows)
+  train_test_data <- rbind(
+    train_data |> dplyr::select( # nolint: nested_pipe_linter
+      .data$date, .data$date_numeric, .data$rR0, .data$log_rR0,
+      .data$log_pop_susceptible, .data$log_weighted_lagged_cases, .data$cases
+    ),
+    prediction_rows
+  )
 
   # Add simulation column
   train_test_data$cases_sim <- NA

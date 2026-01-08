@@ -25,7 +25,8 @@ in °C and returns estimated relative R0 values for a specified vector and
 pathogen.
 }
 \examples{
-# Return relative R0 for Aedeas aegypti and dengue virus for mean temperatures from 18-36°C
+# Return relative R0 for Aedeas aegypti and dengue virus for mean
+# temperatures from 18-36°C
 temperature_r0(c(18,20,22,24,26,28,30,32,34,36), "AeaeDENV")
 
 }

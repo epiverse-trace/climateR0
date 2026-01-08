@@ -32,9 +32,9 @@ prepare_data <- function(input_data, pop, rep_prop) {
     dplyr::arrange(date) |>
     dplyr::mutate(log_rR0 = log(.data$rR0 + 0.0001),
            cumulative_cases = dplyr::lag(cumsum(.data$cases), 1),
-           pop_susceptible = 1 - pmax(0, (cumulative_cases / pop) / rep_prop),
-           weighted_lagged_cases = weight_cases(cases),
-           log_weighted_lagged_cases = log(.data$weighted_lagged_cases + 0.0001),
+           pop_susceptible = 1 - pmax(0, (cumulative_cases / pop) / rep_prop), # nolint
+           weighted_lagged_cases = weight_cases(cases), # nolint
+           log_weighted_lagged_cases = log(.data$weighted_lagged_cases + 0.0001), # nolint: line_length_linter
            log_pop_susceptible = log(.data$pop_susceptible + 0.0001))
 
   # Set cumulative cases to zero initially
@@ -72,7 +72,7 @@ find_closest_days <- function(vec1, vec2) {
   doy1 <- as.numeric(format(vec1, "%j"))
   doy2 <- as.numeric(format(vec2, "%j"))
 
-  sapply(doy1, function(doy) {
+  sapply(doy1, function(doy) { # nolint: undesirable_function_linter
     closest_index <- which.min(abs(doy2 - doy))
     closest_index
   })
